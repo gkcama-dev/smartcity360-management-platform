@@ -26,14 +26,14 @@ public class ZoneHierarchyController{
     }
 
     // Shutdown power at any level (City, District, Street, or Building)
-    @PostMapping("/power/shutdown")
-    public Map<String, Object> shutdownPower(@RequestParam String zoneName) {
+    @RequestMapping(value = "/power/shutdown", method = {RequestMethod.GET, RequestMethod.POST})
+    public Map<String, Object> shutdownPower(@RequestParam(defaultValue = "Metro Colombo City") String zoneName) {
         return hierarchyService.shutdownPower(zoneName);
     }
 
     // Restore power at any level
-    @PostMapping("/power/restore")
-    public Map<String, Object> restorePower(@RequestParam String zoneName) {
+    @RequestMapping(value = "/power/restore", method = {RequestMethod.GET, RequestMethod.POST})
+    public Map<String, Object> restorePower(@RequestParam(defaultValue = "Metro Colombo City") String zoneName) {
         return hierarchyService.restorePower(zoneName);
     }
 
