@@ -52,7 +52,7 @@ public class PolicyEvaluationController {
         sensorData.forEach(context::set);
         return policyService.evaluateSingleRule("CUSTOM-RULE", dslRule, context);
     }
-    
+
     // Get all registered municipal policy rules
     @GetMapping("/policies")
     public Map<String, String> getPolicies() {
