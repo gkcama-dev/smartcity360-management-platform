@@ -399,8 +399,82 @@ function renderUnpackedView(meterId, voltage, kwh, layersList) {
 }
 
 // ==========================================
-// PART B: COMPOSITE PATTERN (Smart Zones Tree)
+// PART B: COMPOSITE PATTERN (Smart Zones Tree & Map)
 // ==========================================
+let currentPartBView = 'map'; // 'map' or 'tree'
+
+function switchPartBView(viewMode) {
+    currentPartBView = viewMode;
+    const mapContainer = document.getElementById('cityMapContainer');
+    const treeContainer = document.getElementById('treeContainer');
+    const btnMap = document.getElementById('btnViewMap');
+    const btnTree = document.getElementById('btnViewTree');
+    const pill = document.getElementById('currentViewModePill');
+
+    if (viewMode === 'map') {
+        if (mapContainer) mapContainer.classList.remove('hidden');
+        if (treeContainer) treeContainer.classList.add('hidden');
+        if (btnMap) {
+            btnMap.className = 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs transition';
+        }
+        if (btnTree) {
+            btnTree.className = 'px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900 transition';
+        }
+        if (pill) {
+            pill.textContent = 'MUNICIPAL MAP';
+            pill.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-xs';
+        }
+    } else {
+        if (mapContainer) mapContainer.classList.add('hidden');
+        if (treeContainer) treeContainer.classList.remove('hidden');
+        if (btnMap) {
+            btnMap.className = 'px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900 transition';
+        }
+        if (btnTree) {
+            btnTree.className = 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs transition';
+        }
+        if (pill) {
+            pill.textContent = 'TREE VIEW';
+            pill.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 shadow-xs';
+        }
+    }
+}
+window.switchPartBView = switchPartBView;
+
+function clearTraceTerminal() {
+    const terminal = document.getElementById('compositeTraceTerminal');
+    if (terminal) {
+        terminal.innerHTML = `
+            <div class="text-slate-400 font-mono text-[11px]">
+                <span class="text-emerald-400 font-bold">[CONSOLE_CLEARED]</span> Ready for execution trace.<br>
+                <span class="text-slate-500">&gt; Target selected:</span> <span class="text-amber-300 font-bold">${currentSelectedZone}</span><br>
+                <span class="text-slate-500">&gt; Awaiting uniform command dispatch (Shutdown / Restore / Report)...</span>
+            </div>
+        `;
+        terminal.scrollTop = 0;
+    }
+}
+window.clearTraceTerminal = clearTraceTerminal;
+
+function scrollTerminalToBottom(terminal) {
+    if (!terminal) return;
+    terminal.scrollTop = terminal.scrollHeight;
+    setTimeout(() => {
+        terminal.scrollTop = terminal.scrollHeight;
+    }, 10);
+}
+
+function getBuildingIcon(type = '') {
+    const t = type.toLowerCase();
+    if (t.includes('bank')) return 'fa-building-columns text-emerald-600';
+    if (t.includes('hotel') || t.includes('hospitality')) return 'fa-hotel text-amber-600';
+    if (t.includes('office') || t.includes('tower') || t.includes('complex')) return 'fa-city text-sky-600';
+    if (t.includes('park') || t.includes('tech') || t.includes('campus')) return 'fa-laptop-code text-indigo-600';
+    if (t.includes('telecom') || t.includes('center')) return 'fa-tower-cell text-cyan-600';
+    if (t.includes('hospital') || t.includes('health') || t.includes('emergency')) return 'fa-hospital text-rose-600';
+    return 'fa-building text-slate-600';
+}
+
 // In-memory persistent Smart City tree for seamless offline preview & live sync
 let inMemoryCityData = {
     name: "Metro Colombo City",
@@ -473,8 +547,8 @@ let inMemoryCityData = {
 };
 
 async function loadCityTree() {
-    const container = document.getElementById('treeContainer');
-    if (!container) return;
+    const treeContainer = document.getElementById('treeContainer');
+    const mapContainer = document.getElementById('cityMapContainer');
 
     try {
         const response = await fetch('/api/part-b/tree');
@@ -488,8 +562,285 @@ async function loadCityTree() {
         // Fall back to in-memory tree
     }
 
+    if (mapContainer) {
+        renderCityMap(inMemoryCityData);
+    }
+
+    if (treeContainer) {
+        treeContainer.innerHTML = '';
+        treeContainer.appendChild(renderZoneNode(inMemoryCityData, 0));
+    }
+}
+
+// Button State Controller for Uniform Power Commands
+function updatePowerButtons(powerActive) {
+    const btnShutdown = document.getElementById('btnShutdownPower');
+    const btnRestore = document.getElementById('btnRestorePower');
+    if (!btnShutdown || !btnRestore) return;
+
+    if (powerActive) {
+        // Power is ON: Shutdown is ENABLED, Restore is DISABLED
+        btnShutdown.disabled = false;
+        btnShutdown.className = "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-extrabold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer";
+
+        btnRestore.disabled = true;
+        btnRestore.className = "bg-slate-100 text-slate-400 border border-slate-200 font-extrabold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-none opacity-40 cursor-not-allowed pointer-events-none";
+    } else {
+        // Power is OFF: Shutdown is DISABLED, Restore is ENABLED
+        btnShutdown.disabled = true;
+        btnShutdown.className = "bg-slate-100 text-slate-400 border border-slate-200 font-extrabold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-none opacity-40 cursor-not-allowed pointer-events-none";
+
+        btnRestore.disabled = false;
+        btnRestore.className = "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-extrabold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer";
+    }
+}
+window.updatePowerButtons = updatePowerButtons;
+
+function getShortBuildingName(name) {
+    return name
+        .replace("Head Office", "HQ")
+        .replace("World Trade Center (Tower A)", "World Trade Center")
+        .replace("National Hospital Smart Wing", "National Hospital")
+        .replace("Virtusa Tech Campus", "Virtusa Campus")
+        .replace("Cinnamon Grand Hotel", "Cinnamon Grand")
+        .replace("Dialog Axiata HQ", "Dialog Axiata");
+}
+
+function getShortIcon(type = '', name = '') {
+    const t = (type + ' ' + name).toLowerCase();
+    if (t.includes('bank')) return '🏦';
+    if (t.includes('hotel') || t.includes('hospitality')) return '🏨';
+    if (t.includes('trade') || t.includes('office') || t.includes('tower')) return '🏢';
+    if (t.includes('virtusa') || t.includes('tech') || t.includes('campus')) return '💻';
+    if (t.includes('dialog') || t.includes('telecom') || t.includes('hq')) return '📡';
+    if (t.includes('hospital') || t.includes('health')) return '🏥';
+    return '🏛️';
+}
+
+function buildShortTrace(node, powerState, lines, indent = '') {
+    const isLeaf = node.zoneType === 'BUILDING';
+    const shortName = getShortBuildingName(node.name);
+
+    if (isLeaf) {
+        const kw = powerState ? Number(node.baseKw || 450).toFixed(0) : '0';
+        const tag = powerState ? '[ONLINE]' : '[OFFLINE]';
+        const icon = getShortIcon(node.buildingType, node.name);
+        lines.push(`${indent}├── ${icon} ${shortName} ➔ ${kw} kW ${tag}`);
+        return;
+    }
+
+    lines.push(`${indent}▼ [${node.zoneType}] ${node.name}`);
+    if (node.subZones && node.subZones.length > 0) {
+        for (let i = 0; i < node.subZones.length; i++) {
+            const child = node.subZones[i];
+            buildShortTrace(child, powerState, lines, indent + '  ');
+        }
+    }
+}
+
+function buildShortReportTrace(node, lines, indent = '') {
+    const isLeaf = node.zoneType === 'BUILDING';
+    const shortName = getShortBuildingName(node.name);
+    const stateTag = node.powerActive ? '[ONLINE]' : '[OFFLINE]';
+
+    if (isLeaf) {
+        const kw = (node.energyConsumptionKw || 0).toFixed(0);
+        const icon = getShortIcon(node.buildingType, node.name);
+        lines.push(`${indent}├── ${icon} ${shortName}: ${kw} kW ${stateTag}`);
+        return;
+    }
+
+    const kw = (node.totalEnergyKw || 0).toFixed(1);
+    lines.push(`${indent}▼ [${node.zoneType}] ${node.name}: ${kw} kW ${stateTag}`);
+    if (node.subZones) {
+        node.subZones.forEach(child => {
+            buildShortReportTrace(child, lines, indent + '  ');
+        });
+    }
+}
+
+// Render Interactive Smart City Grid Map
+function renderCityMap(cityData) {
+    const container = document.getElementById('cityMapContainer');
+    if (!container) return;
     container.innerHTML = '';
-    container.appendChild(renderZoneNode(inMemoryCityData, 0));
+
+    // 1. Root Metropolitan City Bar (Header Perimeter)
+    const isCitySelected = currentSelectedZone === cityData.name;
+    const cityOnline = cityData.powerActive;
+    const cityKw = Number(cityData.totalEnergyKw || 0).toFixed(1);
+
+    const rootBar = document.createElement('div');
+    rootBar.className = `p-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-between ${
+        isCitySelected 
+            ? 'border-2 border-amber-400 bg-amber-500/10 shadow-sm' 
+            : 'border border-slate-200 bg-white hover:border-amber-300 hover:bg-slate-50/80'
+    }`;
+    rootBar.onclick = () => selectTargetZone(cityData.name);
+    rootBar.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <span class="w-7 h-7 rounded-lg bg-neutral-900 text-amber-400 flex items-center justify-center text-xs shadow-xs shrink-0">
+                <i class="fa-solid fa-city text-xs"></i>
+            </span>
+            <div>
+                <div class="flex items-center gap-1.5">
+                    <span class="font-extrabold text-xs text-slate-900">${cityData.name}</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-700 border border-neutral-300">ROOT METROPOLITAN</span>
+                </div>
+                <span class="text-[10px] text-slate-400 font-medium">Click to target whole metropolitan grid</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <span class="font-mono text-xs font-bold ${cityOnline ? 'text-slate-800' : 'text-slate-400'}">${cityKw} kW</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 ${
+                cityOnline 
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                    : 'bg-rose-50 text-rose-700 border border-rose-200'
+            }">
+                <span class="w-1.5 h-1.5 rounded-full ${cityOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}"></span>
+                ${cityOnline ? 'ONLINE' : 'OFFLINE'}
+            </span>
+        </div>
+    `;
+    container.appendChild(rootBar);
+
+    // 2. District Zones Grid
+    if (cityData.subZones && cityData.subZones.length > 0) {
+        cityData.subZones.forEach(district => {
+            const isDistrictSelected = currentSelectedZone === district.name;
+            const distOnline = district.powerActive;
+            const distKw = Number(district.totalEnergyKw || 0).toFixed(1);
+
+            const districtCard = document.createElement('div');
+            districtCard.className = `rounded-xl transition-all bg-white shadow-xs ${
+                isDistrictSelected ? 'border-2 border-amber-400 shadow-sm' : 'border border-slate-200/80 hover:border-slate-300'
+            }`;
+
+            // District Header Strip
+            const distHeader = document.createElement('div');
+            distHeader.className = `p-2 bg-slate-50/90 rounded-t-xl border-b border-slate-200/70 flex items-center justify-between cursor-pointer transition ${
+                isDistrictSelected ? 'bg-amber-50/50' : 'hover:bg-slate-100/70'
+            }`;
+            distHeader.onclick = (e) => {
+                e.stopPropagation();
+                selectTargetZone(district.name);
+            };
+            distHeader.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span class="w-5 h-5 rounded-md bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </span>
+                    <div>
+                        <span class="font-bold text-xs text-slate-800">${district.name}</span>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase ml-1">(DISTRICT ZONE)</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-mono text-[11px] font-bold ${distOnline ? 'text-slate-700' : 'text-slate-400'}">${distKw} kW</span>
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                        distOnline ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                    }">${distOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                </div>
+            `;
+            districtCard.appendChild(distHeader);
+
+            // District Body: Streets & Buildings
+            const distBody = document.createElement('div');
+            distBody.className = 'p-2.5 space-y-2';
+
+            if (district.subZones && district.subZones.length > 0) {
+                district.subZones.forEach(street => {
+                    const isStreetSelected = currentSelectedZone === street.name;
+                    const streetOnline = street.powerActive;
+                    const streetKw = Number(street.totalEnergyKw || 0).toFixed(1);
+
+                    const streetBlock = document.createElement('div');
+                    streetBlock.className = 'space-y-1.5';
+
+                    // Roadway Header Strip (Municipal Road Corridor)
+                    const roadStrip = document.createElement('div');
+                    roadStrip.className = `px-2 py-1 rounded-lg border transition cursor-pointer flex items-center justify-between text-xs font-semibold ${
+                        isStreetSelected 
+                            ? 'border-2 border-amber-400 bg-amber-100/90 text-amber-950 font-bold shadow-xs' 
+                            : 'border border-slate-200 bg-slate-100/80 text-slate-700 hover:bg-slate-200/60'
+                    }`;
+                    roadStrip.onclick = (e) => {
+                        e.stopPropagation();
+                        selectTargetZone(street.name);
+                    };
+                    roadStrip.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-road text-amber-600 text-[11px]"></i>
+                            <span class="font-bold text-xs">${street.name}</span>
+                            <span class="text-[9px] font-mono text-slate-400 font-normal">Street Sector</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-mono text-[10px] font-bold">${streetKw} kW</span>
+                            <span class="w-2 h-2 rounded-full ${streetOnline ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                        </div>
+                    `;
+                    streetBlock.appendChild(roadStrip);
+
+                    // Buildings Grid situated along the road
+                    if (street.subZones && street.subZones.length > 0) {
+                        const buildingsGrid = document.createElement('div');
+                        buildingsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-1.5 pl-2 border-l-2 border-slate-200/80 ml-2';
+
+                        street.subZones.forEach(bldg => {
+                            const isBldgSelected = currentSelectedZone === bldg.name;
+                            const bldgOnline = bldg.powerActive;
+                            const bldgKw = Number(bldg.energyConsumptionKw || 0).toFixed(1);
+                            const iconClass = getBuildingIcon(bldg.buildingType || bldg.name);
+
+                            const bldgCard = document.createElement('div');
+                            bldgCard.className = `p-2 rounded-lg transition-all cursor-pointer flex flex-col justify-between space-y-1.5 ${
+                                isBldgSelected 
+                                    ? 'border-2 border-amber-400 bg-amber-50/70 shadow-sm' 
+                                    : (bldgOnline ? 'border border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-xs' : 'border border-rose-200 bg-slate-50 opacity-75')
+                            }`;
+                            bldgCard.onclick = (e) => {
+                                e.stopPropagation();
+                                selectTargetZone(bldg.name);
+                            };
+
+                            bldgCard.innerHTML = `
+                                <div class="flex items-start justify-between gap-1.5">
+                                    <div class="flex items-center space-x-2 min-w-0">
+                                        <span class="w-5 h-5 rounded-md ${bldgOnline ? 'bg-slate-100' : 'bg-rose-50'} flex items-center justify-center text-xs shrink-0">
+                                            <i class="fa-solid ${iconClass}"></i>
+                                        </span>
+                                        <div class="min-w-0">
+                                            <span class="font-bold text-xs text-slate-800 block truncate" title="${bldg.name}">${bldg.name}</span>
+                                            <span class="text-[9px] text-slate-400 block truncate">${bldg.buildingType || 'Facility Endpoint'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-[10px]">
+                                    <span class="font-mono font-bold ${bldgOnline ? 'text-slate-700' : 'text-rose-600'}">
+                                        ${bldgKw} kW
+                                    </span>
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold flex items-center gap-1 ${
+                                        bldgOnline ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                    }">
+                                        <span class="w-1.5 h-1.5 rounded-full ${bldgOnline ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                                        ${bldgOnline ? 'ONLINE' : 'OFFLINE'}
+                                    </span>
+                                </div>
+                            `;
+                            buildingsGrid.appendChild(bldgCard);
+                        });
+
+                        streetBlock.appendChild(buildingsGrid);
+                    }
+
+                    distBody.appendChild(streetBlock);
+                });
+            }
+
+            districtCard.appendChild(distBody);
+            container.appendChild(districtCard);
+        });
+    }
 }
 
 function renderZoneNode(node, depth) {
@@ -497,8 +848,8 @@ function renderZoneNode(node, depth) {
     const paddingLeft = depth * 14;
 
     const row = document.createElement('div');
-    row.className = `p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between ${
-        currentSelectedZone === node.name ? 'ring-2 ring-amber-400 bg-amber-50/20 border-amber-300' : 'bg-white border-slate-100 hover:border-slate-300'
+    row.className = `p-2.5 rounded-xl transition cursor-pointer flex items-center justify-between ${
+        currentSelectedZone === node.name ? 'border-2 border-amber-400 bg-amber-50/20 shadow-sm' : 'border border-slate-100 bg-white hover:border-slate-300'
     }`;
     row.style.marginLeft = `${paddingLeft}px`;
 
@@ -545,6 +896,11 @@ function selectTargetZone(name) {
     currentSelectedZone = name;
     const badge = document.getElementById('selectedZoneBadge');
     if (badge) badge.textContent = 'Target: ' + name;
+
+    // Check selected target node's power status and update button states
+    const targetNode = findZoneInTree(inMemoryCityData, name) || inMemoryCityData;
+    updatePowerButtons(targetNode.powerActive);
+
     loadCityTree();
 }
 
@@ -562,36 +918,38 @@ function findZoneInTree(current, targetName) {
     return null;
 }
 
-function recursiveApplyPower(node, powerState, logs, indent = '') {
+function countLeafFacilities(node) {
+    if (node.zoneType === 'BUILDING') return 1;
+    let count = 0;
+    if (node.subZones) {
+        for (const child of node.subZones) {
+            count += countLeafFacilities(child);
+        }
+    }
+    return count;
+}
+
+function recursiveApplyPower(node, powerState) {
     const isLeaf = node.zoneType === 'BUILDING';
     if (isLeaf) {
         const oldKw = node.energyConsumptionKw || 0;
         node.powerActive = powerState;
         node.baseKw = node.baseKw || oldKw || 450.0;
         node.energyConsumptionKw = powerState ? node.baseKw : 0.0;
-        const stateTag = powerState ? '[ONLINE]' : '[OFFLINE]';
-        const actionTag = powerState ? `ENERGIZED (+${node.energyConsumptionKw.toFixed(1)} kW)` : `POWER CUT (${node.baseKw.toFixed(1)} kW -> 0.0 kW)`;
-        logs.push(`${indent}├── [LEAF] ${node.name} [${node.buildingType || 'Building'}] -> ${actionTag} ${stateTag}`);
         return node.energyConsumptionKw;
     }
 
-    // Composite node traversal (Depth-First Recursion)
-    logs.push(`${indent}├── Propagating to ${node.zoneType.toLowerCase()}: ${node.name} [${node.zoneType}]`);
     let sumKw = 0;
     let anyChildActive = false;
-
     if (node.subZones && node.subZones.length > 0) {
         for (const child of node.subZones) {
-            const childKw = recursiveApplyPower(child, powerState, logs, indent + '│    ');
-            sumKw += childKw;
+            sumKw += recursiveApplyPower(child, powerState);
             if (child.powerActive) anyChildActive = true;
         }
     }
 
     node.powerActive = powerState ? anyChildActive : false;
     node.totalEnergyKw = Math.round(sumKw * 10) / 10;
-    const stateTag = node.powerActive ? '[ONLINE]' : '[OFFLINE]';
-    logs.push(`${indent}└── ${node.zoneType} Aggregate: ${node.name} -> ${node.totalEnergyKw.toFixed(1)} kW ${stateTag}`);
     return node.totalEnergyKw;
 }
 
@@ -619,9 +977,8 @@ async function dispatchUniformPower(powerState) {
     const targetName = currentSelectedZone;
     const terminal = document.getElementById('compositeTraceTerminal');
 
-    if (terminal) {
-        terminal.textContent += `\n\n$ dispatch uniform_${action} -> Target: "${targetName}"\n[ROUTING] Traversal Model: Depth-First Recursive Poly (1:N Uniform Dispatch)\n[RECURSION] Initiating ${actionTitle} command on component: "${targetName}"...`;
-    }
+    // Update power button states immediately
+    updatePowerButtons(powerState);
 
     // Attempt live Spring Boot backend call
     try {
@@ -633,48 +990,53 @@ async function dispatchUniformPower(powerState) {
 
     // Find target in our composite tree and recursively apply uniform command
     const targetNode = findZoneInTree(inMemoryCityData, targetName);
-    const logs = [];
+    const shortLogs = [];
+    let affectedCount = 0;
 
     if (targetNode) {
-        recursiveApplyPower(targetNode, powerState, logs, '');
+        affectedCount = countLeafFacilities(targetNode);
+        recursiveApplyPower(targetNode, powerState);
+        buildShortTrace(targetNode, powerState, shortLogs, '');
         // Recalculate up to root
         recalculateTreeMetrics(inMemoryCityData);
     } else {
-        logs.push(`[WARN] Target '${targetName}' not found in hierarchy tree.`);
+        shortLogs.push(`[WARN] Target '${targetName}' not found in hierarchy tree.`);
     }
 
+    const finalKw = targetNode ? (targetNode.totalEnergyKw ?? targetNode.energyConsumptionKw ?? 0) : 0;
+    const finalState = powerState ? 'ONLINE' : 'OFFLINE';
+    const timeStr = new Date().toLocaleTimeString();
+
     if (terminal) {
-        if (logs.length > 0) {
-            terminal.textContent += '\n' + logs.join('\n');
-        }
-        const finalKw = targetNode ? (targetNode.totalEnergyKw ?? targetNode.energyConsumptionKw ?? 0) : 0;
-        const finalState = powerState ? 'ONLINE' : 'OFFLINE';
-        terminal.textContent += `\n[SUCCESS] Uniform command '${actionTitle}' executed across all nested branches of '${targetName}'.\n[SYNC] Grid consumption recalculated dynamically: ${finalKw.toFixed(1)} kW [${finalState}].\n$ _`;
-        terminal.scrollTop = terminal.scrollHeight;
+        const cardHtml = `
+            <div class="border-l-2 ${powerState ? 'border-emerald-500 bg-emerald-950/20' : 'border-rose-500 bg-rose-950/20'} pl-3 py-1.5 rounded-r-lg my-1.5 text-xs">
+                <div class="${powerState ? 'text-emerald-400' : 'text-rose-400'} font-bold flex items-center justify-between">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid ${powerState ? 'fa-bolt' : 'fa-power-off'}"></i> 
+                        $ dispatch uniform_${action} --target="${targetName}"
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-normal font-mono">${timeStr}</span>
+                </div>
+                <div class="text-[10px] text-cyan-300 mt-0.5 font-mono">
+                    Traversal Model: Depth-First Recursive Poly (Composite Pattern)
+                </div>
+                <pre class="mt-1.5 text-[11px] text-slate-300 font-mono leading-relaxed whitespace-pre overflow-x-auto bg-[#060B16] p-2 rounded-lg border border-slate-800">${shortLogs.join('\n')}</pre>
+                <div class="mt-1 flex items-center justify-between text-[11px] font-semibold ${powerState ? 'text-emerald-300 bg-emerald-900/30' : 'text-rose-300 bg-rose-900/30'} px-2 py-0.5 rounded">
+                    <span>${powerState ? '🟢 POWER RESTORED: ' + affectedCount + ' facilities energized' : '🛑 SHUTDOWN EXECUTED: ' + affectedCount + ' facilities disconnected'}</span>
+                    <span class="font-mono font-bold">${finalKw.toFixed(1)} kW [${finalState}]</span>
+                </div>
+            </div>
+        `;
+        terminal.innerHTML += cardHtml;
+        scrollTerminalToBottom(terminal);
     }
 
     loadCityTree();
 }
 
-function buildReportTrace(node, lines, indent = '') {
-    const isLeaf = node.zoneType === 'BUILDING';
-    const stateTag = node.powerActive ? '[ONLINE]' : '[OFFLINE]';
-    if (isLeaf) {
-        lines.push(`${indent}├── [LEAF] ${node.name} (${node.buildingType}): ${(node.energyConsumptionKw || 0).toFixed(1)} kW ${stateTag}`);
-        return;
-    }
-    lines.push(`${indent}├── ${node.name} [${node.zoneType}]: ${(node.totalEnergyKw || 0).toFixed(1)} kW ${stateTag}`);
-    if (node.subZones) {
-        node.subZones.forEach(sub => buildReportTrace(sub, lines, indent + '│    '));
-    }
-}
-
 async function dispatchReportUsage() {
     const targetName = currentSelectedZone;
     const terminal = document.getElementById('compositeTraceTerminal');
-    if (terminal) {
-        terminal.textContent += `\n\n$ dispatch uniform_report_usage -> Target: "${targetName}"\n[AGGREGATING] Querying nested Leaf consumption metrics recursively...`;
-    }
 
     // Try backend if live
     try {
@@ -694,19 +1056,41 @@ async function dispatchReportUsage() {
     const isLeaf = targetNode.zoneType === 'BUILDING';
     const energyVal = isLeaf ? (targetNode.energyConsumptionKw || 0) : (targetNode.totalEnergyKw || 0);
     const powerStateText = targetNode.powerActive ? 'ONLINE (Energized)' : 'OFFLINE (Zero Feed)';
+    const totalFacilities = countLeafFacilities(targetNode);
+    const timeStr = new Date().toLocaleTimeString();
 
-    const hierarchyBreakdown = [];
-    buildReportTrace(targetNode, hierarchyBreakdown, '');
+    const shortReportLines = [];
+    buildShortReportTrace(targetNode, shortReportLines, '');
 
     if (terminal) {
-        terminal.textContent += `\n[REPORT] Zone: ${targetNode.name} [${targetNode.zoneType}]`;
-        terminal.textContent += `\n[STATUS] Grid State: ${powerStateText}`;
-        terminal.textContent += `\n[METRICS] Active Power Draw: ${Number(energyVal).toFixed(1)} kW`;
-        if (!isLeaf && targetNode.subZones && targetNode.subZones.length > 0) {
-            terminal.textContent += `\n[HIERARCHY BREAKDOWN]\n` + hierarchyBreakdown.join('\n');
-        }
-        terminal.textContent += `\n[TOTAL_ENERGY] ${Number(energyVal).toFixed(1)} kW\n$ _`;
-        terminal.scrollTop = terminal.scrollHeight;
+        const cardHtml = `
+            <div class="border-l-2 border-amber-500 bg-amber-950/20 pl-3 py-1.5 rounded-r-lg my-1.5 text-xs">
+                <div class="text-amber-400 font-bold flex items-center justify-between">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-simple"></i> 
+                        $ dispatch uniform_report_usage --target="${targetName}"
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-normal font-mono">${timeStr}</span>
+                </div>
+                <div class="mt-1.5 grid grid-cols-2 gap-2 text-[10.5px] bg-[#060B16] p-2 rounded-lg border border-slate-800 font-mono">
+                    <div><span class="text-slate-400">Target Node:</span> <span class="font-bold text-white">${targetNode.name}</span></div>
+                    <div><span class="text-slate-400">Zone Type:</span> <span class="font-bold text-amber-300">[${targetNode.zoneType}]</span></div>
+                    <div><span class="text-slate-400">State:</span> <span class="font-bold ${targetNode.powerActive ? 'text-emerald-400' : 'text-rose-400'}">${powerStateText}</span></div>
+                    <div><span class="text-slate-400">Active Load:</span> <span class="font-bold text-emerald-300 font-mono">${Number(energyVal).toFixed(1)} kW</span></div>
+                </div>
+                ${!isLeaf && targetNode.subZones && targetNode.subZones.length > 0 ? `
+                <div class="mt-1.5">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Hierarchy Breakdown:</span>
+                    <pre class="text-[11px] text-slate-300 font-mono leading-relaxed whitespace-pre overflow-x-auto bg-[#060B16] p-2 rounded-lg border border-slate-800">${shortReportLines.join('\n')}</pre>
+                </div>` : ''}
+                <div class="mt-1 flex items-center justify-between text-[11px] font-semibold text-amber-300 bg-amber-900/30 px-2 py-0.5 rounded">
+                    <span>⚡ TOTAL AGGREGATED GRID LOAD:</span>
+                    <span class="font-mono font-bold text-amber-200">${Number(energyVal).toFixed(1)} kW</span>
+                </div>
+            </div>
+        `;
+        terminal.innerHTML += cardHtml;
+        scrollTerminalToBottom(terminal);
     }
 }
 
@@ -777,8 +1161,23 @@ async function addNewZone() {
 
     const terminal = document.getElementById('compositeTraceTerminal');
     if (terminal) {
-        terminal.textContent += `\n\n$ dispatch expand_infrastructure -> Target: "${parentName}"\n[COMPOSITE_PATTERN] Dynamic Zone Extension: Added new ${newType} '${newName}' under '${parentName}'.\n[SYNC] Grid total recalculated: ${inMemoryCityData.totalEnergyKw.toFixed(1)} kW [ONLINE].\n$ _`;
-        terminal.scrollTop = terminal.scrollHeight;
+        const cardHtml = `
+            <div class="border-l-2 border-cyan-500 bg-cyan-950/20 pl-3 py-1.5 rounded-r-lg my-2 text-xs">
+                <div class="text-cyan-400 font-bold flex items-center justify-between">
+                    <span>🏗️ DYNAMIC EXPANSION: add_component --parent="${parentName}"</span>
+                    <span class="text-[10px] text-slate-400 font-normal font-mono">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="mt-1 text-[11px] text-slate-300 font-mono">
+                    Added new ${newType} <span class="text-amber-300 font-bold">"${newName}"</span> under parent <span class="text-white font-bold">"${parentName}"</span>.
+                </div>
+                <div class="mt-1 flex items-center justify-between text-[11px] font-semibold text-cyan-300 bg-cyan-900/30 px-2.5 py-1 rounded">
+                    <span>Grid Load Recalculated:</span>
+                    <span class="font-mono font-bold">${inMemoryCityData.totalEnergyKw.toFixed(1)} kW [ONLINE]</span>
+                </div>
+            </div>
+        `;
+        terminal.innerHTML += cardHtml;
+        scrollTerminalToBottom(terminal);
     }
 
     if (newNameInput) newNameInput.value = '';

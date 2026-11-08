@@ -714,45 +714,65 @@
                 </div>
 
                 <!-- Scrollable Body Content -->
-                <div class="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4">
-                    <!-- Two-Column Grid: Left Tree View, Right Uniform Dispatcher & Terminal -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="flex-1 overflow-y-auto p-3 sm:p-3.5 lg:p-4 space-y-2.5">
+                    <!-- Two-Column Grid: Left Map/Tree View, Right Uniform Dispatcher & Terminal -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
                     
-                    <!-- Left Column: Zone Hierarchy Tree -->
-                    <div class="bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70 space-y-3 flex flex-col justify-between">
+                    <!-- Left Column: Smart City Municipal Grid Map & Hierarchy -->
+                    <div class="bg-[#F8F9FA] p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 flex flex-col justify-between space-y-2 shadow-xs">
                         <div>
-                            <div class="flex items-center justify-between pb-2 border-b border-slate-200/80 mb-3">
+                            <!-- Header with View Toggle (Map View vs Tree View) -->
+                            <div class="flex flex-wrap items-center justify-between pb-2 border-b border-slate-200/80 mb-2 gap-2">
                                 <div>
-                                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Zone Hierarchy Tree</h4>
-                                    <p class="text-[11px] text-slate-400">Select any node to target uniform command</p>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Smart Zone Infrastructure</h4>
+                                        <span id="currentViewModePill" class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-xs">MUNICIPAL MAP</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400">Click any building, street corridor, or district zone</p>
                                 </div>
-                                <span id="selectedZoneBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 shadow-sm">
-                                    Target: Metro Colombo City
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <!-- View Switcher Toggle -->
+                                    <div class="bg-slate-200/80 p-0.5 rounded-lg flex items-center text-[10px] font-bold shadow-inner">
+                                        <button id="btnViewMap" onclick="switchPartBView('map')" class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs transition">
+                                            <i class="fa-solid fa-map-location-dot mr-1 text-amber-600"></i> Map
+                                        </button>
+                                        <button id="btnViewTree" onclick="switchPartBView('tree')" class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-900 transition">
+                                            <i class="fa-solid fa-sitemap mr-1 text-slate-400"></i> Tree
+                                        </button>
+                                    </div>
+                                    <span id="selectedZoneBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 shadow-sm shrink-0">
+                                        Target: Metro Colombo City
+                                    </span>
+                                </div>
                             </div>
 
-                            <!-- Interactive Tree Container -->
-                            <div id="treeContainer" class="space-y-1.5 overflow-y-auto max-h-[460px] pr-2">
+                            <!-- Map View Container (Default: Interactive City Grid Map) -->
+                            <div id="cityMapContainer" class="space-y-2.5 overflow-y-auto max-h-[340px] sm:max-h-[360px] p-1.5 pr-2 scrollbar-thin">
+                                <!-- Dynamically Rendered by renderCityMap() in app.js -->
+                            </div>
+
+                            <!-- Tree View Container (Available via toggle) -->
+                            <div id="treeContainer" class="space-y-1 overflow-y-auto max-h-[340px] sm:max-h-[360px] p-1.5 pr-2 hidden">
                                 <p class="text-xs text-slate-400">Loading hierarchy tree...</p>
                             </div>
                         </div>
 
                         <!-- Dynamic Expand City (Q3) Drawer / Form -->
-                        <div class="pt-3 border-t border-slate-200/80">
+                        <div class="pt-2 border-t border-slate-200/80">
                             <details class="group cursor-pointer">
                                 <summary class="flex items-center justify-between text-xs font-bold text-slate-600 group-hover:text-amber-600 transition">
                                     <span class="flex items-center gap-1.5"><i class="fa-solid fa-plus-circle text-amber-500"></i> Expand Growing City Infrastructure (Q3)</span>
                                     <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 group-open:rotate-180 transition"></i>
                                 </summary>
-                                <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                    <input type="text" id="newZoneName" placeholder="New Zone Name" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:border-amber-500">
+                                <div class="mt-2.5 grid grid-cols-2 gap-2 text-xs">
+                                    <input type="text" id="newZoneName" placeholder="New Zone / Facility Name" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:border-amber-500">
                                     <select id="newZoneType" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:border-amber-500">
                                         <option value="BUILDING">BUILDING (Facility Endpoint)</option>
                                         <option value="STREET">STREET (Distribution Sector)</option>
                                         <option value="DISTRICT">DISTRICT (Administrative Region)</option>
                                     </select>
-                                    <input type="text" id="newBuildingType" value="Commercial Hub" placeholder="Building Category" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:border-amber-500">
-                                    <input type="number" id="newEnergyKw" value="450" placeholder="kW Energy" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:border-amber-500">
+                                    <input type="text" id="newBuildingType" value="Commercial Hub" placeholder="Building Category (e.g. Bank, Hospital)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:border-amber-500">
+                                    <input type="number" id="newEnergyKw" value="450" placeholder="kW Energy Draw" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:border-amber-500">
                                     <button onclick="addNewZone()" class="col-span-2 bg-neutral-900 hover:bg-neutral-800 text-white font-bold py-2 rounded-lg text-xs transition">
                                         Add Child to Selected Target
                                     </button>
@@ -762,33 +782,62 @@
                     </div>
 
                     <!-- Right Column: Uniform Command Dispatcher & Execution Console -->
-                    <div class="bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70 space-y-4 flex flex-col justify-between">
-                        <div>
+                    <div class="bg-[#F8F9FA] p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 flex flex-col justify-between space-y-2 shadow-xs">
+                        <div class="flex flex-col space-y-2">
                             <div>
-                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Uniform Command Dispatcher</h4>
-                                <p class="text-[11px] text-slate-400">Synchronized 1:N Municipal Grid Power Dispatch</p>
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Uniform Command Dispatcher</h4>
+                                <p class="text-[11px] text-slate-400">Synchronized 1:N Municipal Grid Power Dispatch (Composite Pattern)</p>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-2.5 mt-3">
-                                <button onclick="dispatchUniformPower(false)" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-extrabold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <div class="grid grid-cols-3 gap-2">
+                                <button id="btnShutdownPower" onclick="dispatchUniformPower(false)" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-extrabold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer">
                                     <i class="fa-solid fa-power-off"></i> Shutdown Power
                                 </button>
-                                <button onclick="dispatchUniformPower(true)" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-extrabold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                                <button id="btnRestorePower" onclick="dispatchUniformPower(true)" disabled class="bg-slate-100 text-slate-400 border border-slate-200 font-extrabold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-none opacity-40 cursor-not-allowed pointer-events-none">
                                     <i class="fa-solid fa-bolt"></i> Restore Power
                                 </button>
-                                <button onclick="dispatchReportUsage()" class="bg-neutral-900 hover:bg-neutral-800 text-white font-extrabold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                                <button onclick="dispatchReportUsage()" class="bg-neutral-900 hover:bg-neutral-800 text-white font-extrabold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer">
                                     <i class="fa-solid fa-chart-simple"></i> Report Usage
                                 </button>
                             </div>
 
-                            <div class="mt-4">
-                                <span class="text-[11px] font-bold text-slate-500 block mb-1.5">Recursive Execution Trace:</span>
-                                <div class="bg-[#0F172A] p-4 rounded-xl text-emerald-400 font-mono text-[11px] shadow-inner h-64 overflow-y-auto leading-relaxed border border-slate-800" id="compositeTraceTerminal">[SYSTEM_READY] Municipal Power Grid hierarchy synchronized. Awaiting command...
-$ _</div>
+                            <!-- Terminal Header & Container (Strictly Height-Capped to Prevent Page Expansion) -->
+                            <div class="flex flex-col">
+                                <div class="flex items-center justify-between pb-1">
+                                    <span class="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-terminal text-slate-400"></i> Recursive Execution Trace
+                                    </span>
+                                    <button onclick="clearTraceTerminal()" class="text-[10px] text-slate-400 hover:text-slate-700 font-semibold flex items-center gap-1 transition">
+                                        <i class="fa-solid fa-eraser"></i> Clear Console
+                                    </button>
+                                </div>
+                                <div class="bg-[#0A0F1D] rounded-xl border border-slate-800 shadow-2xl h-[335px] max-h-[335px] flex flex-col overflow-hidden shrink-0">
+                                    <!-- Console Title Bar -->
+                                    <div class="bg-[#10172A] px-3.5 py-1.5 border-b border-slate-800/80 flex items-center justify-between text-[10px] font-mono shrink-0">
+                                        <div class="flex items-center space-x-1.5">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                                            <span class="ml-2 text-slate-400 font-semibold">grid-ctl &bull; dfs-recursive-poly</span>
+                                        </div>
+                                        <span class="text-emerald-400 text-[10px] font-bold flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> READY
+                                        </span>
+                                    </div>
+                                    <!-- Console Body: strictly scrollable inside the terminal window -->
+                                    <div id="compositeTraceTerminal" class="p-2.5 sm:p-3 text-emerald-400 font-mono text-[11px] h-[300px] max-h-[300px] overflow-y-auto overflow-x-hidden leading-relaxed space-y-2 select-text scrollbar-thin">
+                                        <div class="text-slate-400 font-mono text-[11px]">
+                                            <span class="text-emerald-400 font-bold">[SYSTEM_READY]</span> Municipal Power Grid hierarchy synchronized.<br>
+                                            <span class="text-slate-500">&gt; Target selected:</span> <span class="text-amber-300 font-bold">Metro Colombo City</span><br>
+                                            <span class="text-slate-500">&gt; Awaiting uniform command dispatch (Shutdown / Restore / Report)...</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-200/80 text-center text-slate-500">
+                        <!-- Jurisdiction Footer Stats -->
+                        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/80 text-center text-slate-500 shrink-0">
                             <div>
                                 <span class="text-[9px] font-bold text-slate-400 uppercase block">Root Jurisdiction</span>
                                 <span class="text-xs font-mono font-bold text-neutral-800 block">Metropolitan City</span>
