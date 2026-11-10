@@ -1,6 +1,7 @@
 package com.smartcity.smartcity360.parte_dsl.controller;
 
 import com.smartcity.smartcity360.parte_dsl.context.CityContext;
+import com.smartcity.smartcity360.parte_dsl.parser.PolicyParser;
 import com.smartcity.smartcity360.parte_dsl.service.CityPolicyService;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,5 +58,51 @@ public class PolicyEvaluationController {
     @GetMapping("/policies")
     public Map<String, String> getPolicies() {
         return policyService.getRegisteredPolicies();
+    }
+
+    // Register a new municipal policy at runtime
+    @PostMapping("/add-policy")
+    public Map<String, Object> addPolicy(
+            @RequestParam String policyId,
+            @RequestParam String dslRule) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String trimmedId = (policyId == null || policyId.trim().isEmpty())
+                    ? "POL-" + String.format("%02d", policyService.getRegisteredPolicies().size() + 1)
+                    : policyId.trim().toUpperCase();
+
+            // Validate rule syntax with Parser
+            PolicyParser.parse(dslRule);
+
+            policyService.addPolicy(trimmedId, dslRule.trim());
+            response.put("success", true);
+            response.put("policyId", trimmedId);
+            response.put("dslRule", dslRule.trim());
+            response.put("message", "Policy " + trimmedId + " registered successfully into Active Municipal Ordinances.");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "DSL Parsing Error: " + e.getMessage());
+        }
+        return response;
+    }
+
+    // Delete a municipal policy
+    @DeleteMapping("/delete-policy/{policyId}")
+    public Map<String, Object> deletePolicy(@PathVariable String policyId) {
+        Map<String, Object> response = new HashMap<>();
+        policyService.removePolicy(policyId);
+        response.put("success", true);
+        response.put("message", "Policy " + policyId + " removed.");
+        return response;
+    }
+
+    // Reset default municipal policies
+    @PostMapping("/reset-policies")
+    public Map<String, Object> resetPolicies() {
+        policyService.resetDefaults();
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Municipal policies reset to defaults.");
+        return response;
     }
 }

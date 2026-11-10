@@ -15,9 +15,7 @@ public class CityPolicyService {
 
     public CityPolicyService() {
         // Register default municipal policies defined in DSL
-        registeredPolicies.put("POL-01", "NOISE_LEVEL > 75 AND TIME_HOUR >= 22");
-        registeredPolicies.put("POL-02", "PARKING_DURATION > 120 OR VEHICLE_TYPE == COMMERCIAL");
-        registeredPolicies.put("POL-03", "AIR_AQI > 150 AND SENSOR_ZONE == INDUSTRIAL");
+        resetDefaults();
     }
 
     // Evaluate all registered policies against current sensor telemetry
@@ -59,7 +57,19 @@ public class CityPolicyService {
     public Map<String, String> getRegisteredPolicies() {
         return new LinkedHashMap<>(registeredPolicies);
     }
+
     public void addPolicy(String policyId, String dslRule) {
         registeredPolicies.put(policyId, dslRule);
+    }
+
+    public void removePolicy(String policyId) {
+        registeredPolicies.remove(policyId);
+    }
+
+    public void resetDefaults() {
+        registeredPolicies.clear();
+        registeredPolicies.put("POL-01", "NOISE_LEVEL > 75 AND TIME_HOUR >= 22");
+        registeredPolicies.put("POL-02", "PARKING_DURATION > 120 OR VEHICLE_TYPE == COMMERCIAL");
+        registeredPolicies.put("POL-03", "AIR_AQI > 150 AND SENSOR_ZONE == INDUSTRIAL");
     }
 }

@@ -226,12 +226,49 @@ function selectComboboxOption(code, label, iconClass) {
 
 // Close combobox when clicking anywhere outside
 document.addEventListener('click', (e) => {
+    // Meter preset dropdown (Part A)
     const container = document.getElementById('customComboboxContainer');
     const menu = document.getElementById('comboboxMenu');
     const chevron = document.getElementById('comboboxChevron');
     if (container && menu && !container.contains(e.target)) {
         menu.classList.add('hidden');
         if (chevron) chevron.classList.remove('rotate-180');
+    }
+
+    // Incident severity dropdown (Part C)
+    const sevContainer = document.getElementById('customSeverityContainer');
+    const sevMenu = document.getElementById('severityMenu');
+    const sevChevron = document.getElementById('severityChevron');
+    if (sevContainer && sevMenu && !sevContainer.contains(e.target)) {
+        sevMenu.classList.add('hidden');
+        if (sevChevron) sevChevron.classList.remove('rotate-180');
+    }
+
+    // Streetlight fleet scale dropdown (Part D)
+    const scaleContainer = document.getElementById('customScaleContainer');
+    const scaleMenu = document.getElementById('scaleMenu');
+    const scaleChevron = document.getElementById('scaleChevron');
+    if (scaleContainer && scaleMenu && !scaleContainer.contains(e.target)) {
+        scaleMenu.classList.add('hidden');
+        if (scaleChevron) scaleChevron.classList.remove('rotate-180');
+    }
+
+    // Vehicle classification dropdown (Part E)
+    const vehicleContainer = document.getElementById('customVehicleContainer');
+    const vehicleMenu = document.getElementById('vehicleMenu');
+    const vehicleChevron = document.getElementById('vehicleChevron');
+    if (vehicleContainer && vehicleMenu && !vehicleContainer.contains(e.target)) {
+        vehicleMenu.classList.add('hidden');
+        if (vehicleChevron) vehicleChevron.classList.remove('rotate-180');
+    }
+
+    // Sensor zone dropdown (Part E)
+    const zoneContainer = document.getElementById('customZoneContainer');
+    const zoneMenu = document.getElementById('zoneMenu');
+    const zoneChevron = document.getElementById('zoneChevron');
+    if (zoneContainer && zoneMenu && !zoneContainer.contains(e.target)) {
+        zoneMenu.classList.add('hidden');
+        if (zoneChevron) zoneChevron.classList.remove('rotate-180');
     }
 });
 
@@ -1107,18 +1144,18 @@ async function addNewZone() {
     const newEnergy = parseFloat(newEnergyInput ? newEnergyInput.value : 100) || 100.0;
 
     if (!newName) {
-        alert('Please enter a name for the new zone or facility.');
+        showAppAlert('Zone Name Required', 'Please enter a name for the new zone or facility.', 'warning');
         return;
     }
 
     const parentNode = findZoneInTree(inMemoryCityData, parentName);
     if (!parentNode) {
-        alert(`Parent zone '${parentName}' not found.`);
+        showAppAlert('Parent Not Found', `Parent zone '${parentName}' not found in the grid hierarchy.`, 'warning');
         return;
     }
 
     if (parentNode.zoneType === 'BUILDING') {
-        alert("Cannot add child components to a Leaf Node (Building). Please select a City, District, or Street node as target!");
+        showAppAlert('Invalid Target Node', 'Cannot add child components to a Leaf Node (Building). Please select a City, District, or Street node as target!', 'warning');
         return;
     }
 
@@ -1241,44 +1278,160 @@ let inMemoryComplaints = [
     }
 ];
 
+// ==========================================
+// PART C: CHAIN OF RESPONSIBILITY (Citizen Complaints)
+// ==========================================
+function toggleSeverityMenu() {
+    const menu = document.getElementById('severityMenu');
+    const chevron = document.getElementById('severityChevron');
+    if (!menu) return;
+    const isHidden = menu.classList.contains('hidden');
+    if (isHidden) {
+        menu.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-180');
+    } else {
+        menu.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
+    }
+}
+window.toggleSeverityMenu = toggleSeverityMenu;
+
+function selectSeverityOption(val, label, dotColor, badgeClass) {
+    const input = document.getElementById('cSeverity');
+    const selectedText = document.getElementById('severitySelectedText');
+    const selectedDot = document.getElementById('severitySelectedDot');
+    
+    if (input) input.value = val;
+    if (selectedText) {
+        selectedText.textContent = label;
+        selectedText.className = 'truncate font-bold text-slate-800';
+    }
+    if (selectedDot) {
+        selectedDot.className = `w-2.5 h-2.5 rounded-full ${dotColor} shrink-0`;
+    }
+    
+    toggleSeverityMenu();
+}
+window.selectSeverityOption = selectSeverityOption;
+
+let currentComplaintFilter = 'ALL';
+
+function filterComplaints(filter) {
+    currentComplaintFilter = filter;
+    
+    const tabs = [
+        { id: 'filterTabAll', role: 'ALL' },
+        { id: 'filterTabStaff', role: 'STAFF' },
+        { id: 'filterTabSupervisor', role: 'SUPERVISOR' },
+        { id: 'filterTabManager', role: 'MANAGER' }
+    ];
+    
+    tabs.forEach(t => {
+        const btn = document.getElementById(t.id);
+        if (!btn) return;
+        if (t.role === filter) {
+            btn.className = 'px-3 py-1 rounded-lg font-bold bg-neutral-900 text-white shadow-xs transition';
+        } else {
+            btn.className = 'px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition';
+        }
+    });
+
+    renderComplaintsFiltered();
+}
+window.filterComplaints = filterComplaints;
+
+function updateComplaintBadges() {
+    const badgeAll = document.getElementById('countBadgeAll');
+    const badgeStaff = document.getElementById('countBadgeStaff');
+    const badgeSupervisor = document.getElementById('countBadgeSupervisor');
+    const badgeManager = document.getElementById('countBadgeManager');
+
+    const total = inMemoryComplaints.length;
+    const staffCount = inMemoryComplaints.filter(c => c.severity === 'LOW' || (c.resolvedBy && c.resolvedBy.includes('Staff'))).length;
+    const supCount = inMemoryComplaints.filter(c => c.severity === 'MEDIUM' || (c.resolvedBy && c.resolvedBy.includes('Supervisor'))).length;
+    const mgrCount = inMemoryComplaints.filter(c => c.severity === 'HIGH' || c.severity === 'CRITICAL' || (c.resolvedBy && (c.resolvedBy.includes('Manager') || c.resolvedBy.includes('Disaster')))).length;
+
+    if (badgeAll) badgeAll.textContent = total;
+    if (badgeStaff) badgeStaff.textContent = staffCount;
+    if (badgeSupervisor) badgeSupervisor.textContent = supCount;
+    if (badgeManager) badgeManager.textContent = mgrCount;
+}
+
+function renderComplaintsFiltered() {
+    let filtered = inMemoryComplaints;
+    if (currentComplaintFilter === 'STAFF') {
+        filtered = inMemoryComplaints.filter(c => c.severity === 'LOW' || (c.resolvedBy && c.resolvedBy.includes('Staff')));
+    } else if (currentComplaintFilter === 'SUPERVISOR') {
+        filtered = inMemoryComplaints.filter(c => c.severity === 'MEDIUM' || (c.resolvedBy && c.resolvedBy.includes('Supervisor')));
+    } else if (currentComplaintFilter === 'MANAGER') {
+        filtered = inMemoryComplaints.filter(c => c.severity === 'HIGH' || c.severity === 'CRITICAL' || (c.resolvedBy && (c.resolvedBy.includes('Manager') || c.resolvedBy.includes('Disaster'))));
+    }
+    renderComplaintsList(filtered);
+    updateComplaintBadges();
+}
+
 function renderComplaintsList(list) {
     const container = document.getElementById('complaintsContainer');
     if (!container) return;
 
     container.innerHTML = '';
+
+    if (!list || list.length === 0) {
+        container.innerHTML = `
+            <div class="p-6 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80 text-xs">
+                <i class="fa-solid fa-inbox text-slate-300 text-lg mb-1.5 block"></i>
+                No complaints currently assigned to this responsibility tier.
+            </div>
+        `;
+        return;
+    }
+
     list.forEach(c => {
         const card = document.createElement('div');
-        card.className = 'bg-white border border-slate-100 rounded-2xl p-4 space-y-2.5 shadow-sm';
+        card.className = 'bg-white border border-slate-200/80 rounded-2xl p-3.5 space-y-2 shadow-xs transition hover:border-slate-300';
 
         const severityBadge = {
-            'LOW': 'bg-slate-100 text-slate-600 border-slate-200',
+            'LOW': 'bg-emerald-50 text-emerald-700 border-emerald-200',
             'MEDIUM': 'bg-amber-50 text-amber-700 border-amber-200',
             'HIGH': 'bg-orange-50 text-orange-700 border-orange-200',
-            'CRITICAL': 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'
-        }[c.severity] || 'bg-slate-100 text-slate-600';
+            'CRITICAL': 'bg-rose-50 text-rose-700 border-rose-200'
+        }[c.severity] || 'bg-slate-100 text-slate-600 border-slate-200';
+
+        const roleColor = {
+            'Local Community Staff': 'text-emerald-700 bg-emerald-50 border border-emerald-200',
+            'Zonal Area Supervisor': 'text-amber-800 bg-amber-50 border border-amber-200',
+            'Chief City Manager': 'text-rose-800 bg-rose-50 border border-rose-200'
+        }[c.resolvedBy] || 'text-slate-700 bg-slate-100 border border-slate-200';
 
         const historyHtml = c.escalationHistory.map(h => 
-            `<li class="text-[11px] text-slate-500 font-medium flex items-start gap-1.5"><i class="fa-solid fa-arrow-right text-[9px] text-amber-500 mt-1"></i> ${h}</li>`
+            `<li class="text-[11px] text-slate-600 font-medium flex items-start gap-1.5 leading-snug">
+                <i class="fa-solid fa-arrow-right text-[8px] text-amber-500 mt-1 shrink-0"></i> 
+                <span>${h}</span>
+            </li>`
         ).join('');
 
         card.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <span class="font-mono text-xs font-bold text-neutral-900">${c.id}</span>
-                    <span class="text-xs font-bold text-slate-800">${c.title}</span>
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center space-x-2 truncate">
+                    <span class="font-mono text-[11px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">${c.id}</span>
+                    <span class="text-xs font-bold text-slate-900 truncate">${c.title}</span>
                 </div>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${severityBadge}">${c.severity}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${severityBadge} shrink-0">${c.severity}</span>
             </div>
-            <div class="text-[11px] text-slate-400 flex flex-wrap gap-4 border-b border-slate-100 pb-2">
-                <span>${c.citizenName}</span> • <span>${c.contactNumber}</span> • <span>${c.location}</span>
+            <div class="text-[11px] text-slate-500 flex flex-wrap gap-2 sm:gap-3 border-b border-slate-100 pb-1.5">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-user text-slate-400 text-[10px]"></i> ${c.citizenName}</span>
+                <span class="text-slate-300">•</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-phone text-slate-400 text-[10px]"></i> ${c.contactNumber}</span>
+                <span class="text-slate-300">•</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-slate-400 text-[10px]"></i> ${c.location}</span>
             </div>
-            <div class="bg-[#F8F9FA] p-2.5 rounded-xl border border-slate-100">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Escalation Trail:</span>
+            <div class="bg-[#F8F9FA] p-2 rounded-xl border border-slate-100">
+                <span class="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Escalation Audit Trail:</span>
                 <ul class="space-y-1">${historyHtml}</ul>
             </div>
-            <div class="text-xs flex items-center justify-between text-slate-500 pt-0.5">
-                <span>Resolved by: <strong class="text-emerald-700 font-bold">${c.resolvedBy}</strong></span>
-                <span class="text-[10px]">${c.submittedAt}</span>
+            <div class="text-xs flex flex-wrap items-center justify-between gap-2 text-slate-500 pt-0.5">
+                <span class="text-[11px]">Handled by: <strong class="px-2 py-0.5 rounded text-[10px] font-bold ${roleColor}">${c.resolvedBy}</strong></span>
+                <span class="text-[10px] text-slate-400 font-mono">${c.submittedAt}</span>
             </div>
         `;
         container.appendChild(card);
@@ -1296,23 +1449,41 @@ async function loadComplaints() {
     } catch (err) {
         console.warn('Backend complaints endpoint offline. Using verified municipal audit trail simulation.');
     }
-    renderComplaintsList(inMemoryComplaints);
+    renderComplaintsFiltered();
 }
 
 async function submitComplaint() {
-    const name = document.getElementById('cCitizenName')?.value || 'Citizen';
-    const contact = document.getElementById('cContact')?.value || '0770000000';
-    const title = document.getElementById('cTitle')?.value || 'Municipal incident';
-    const location = document.getElementById('cLocation')?.value || 'Colombo';
-    const severity = document.getElementById('cSeverity')?.value || 'LOW';
+    const nameInput = document.getElementById('cCitizenName');
+    const contactInput = document.getElementById('cContact');
+    const titleInput = document.getElementById('cTitle');
+    const locationInput = document.getElementById('cLocation');
+    const severityInput = document.getElementById('cSeverity');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const contact = contactInput ? contactInput.value.trim() : '';
+    const title = titleInput ? titleInput.value.trim() : '';
+    const location = locationInput ? locationInput.value.trim() : '';
+    const severity = severityInput ? severityInput.value.trim() : '';
+
+    if (!name || !contact || !title || !location) {
+        showAppAlert('Incomplete Details', 'Please fill out all required incident details (Citizen Name, Contact Phone, Incident Title, and Street Location).', 'warning');
+        return;
+    }
+
+    if (!severity) {
+        showAppAlert('Severity Level Required', 'Please select an Incident Severity Level (LOW, MEDIUM, HIGH, or CRITICAL) from the dropdown before dispatching!', 'warning');
+        return;
+    }
 
     const url = `/api/part-c/submit?citizenName=${encodeURIComponent(name)}&contact=${encodeURIComponent(contact)}&title=${encodeURIComponent(title)}&location=${encodeURIComponent(location)}&severity=${severity}`;
 
     try {
         const res = await fetch(url, { method: 'POST' });
         if (res.ok) {
+            const created = await res.json();
             await loadComplaints();
-            alert('Complaint submitted and successfully escalated through municipal incident tiers!');
+            resetComplaintForm();
+            showIncidentConfirmModal(created);
             return;
         }
         throw new Error('Server error');
@@ -1353,17 +1524,217 @@ async function submitComplaint() {
         };
 
         inMemoryComplaints.unshift(newComplaint);
-        renderComplaintsList(inMemoryComplaints);
-        alert(`Incident dispatched! Escalated dynamically to: ${resolvedBy}`);
+        renderComplaintsFiltered();
+        resetComplaintForm();
+        showIncidentConfirmModal(newComplaint);
+    }
+}
+
+// ==========================================
+// THEME CONFIRMATION MODAL & ALERT HELPERS
+// ==========================================
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function showIncidentConfirmModal(complaint) {
+    const modal = document.getElementById('themeConfirmModal');
+    const badge = document.getElementById('confirmModalBadge');
+    const title = document.getElementById('confirmModalTitle');
+    const icon = document.getElementById('confirmModalIcon');
+    const body = document.getElementById('confirmModalBody');
+    if (!modal) return;
+
+    const isCritical = complaint.severity === 'CRITICAL';
+    const isHigh = complaint.severity === 'HIGH';
+    const isMed = complaint.severity === 'MEDIUM';
+
+    const tierName = isCritical ? 'Tier 4 • Emergency Response Unit' :
+                     isHigh ? 'Tier 3 • Chief City Manager' :
+                     isMed ? 'Tier 2 • Zonal Area Supervisor' :
+                     'Tier 1 • Local Community Staff';
+
+    const badgeColor = isCritical ? 'bg-rose-100 text-rose-800 border-rose-300' :
+                       isHigh ? 'bg-orange-100 text-orange-800 border-orange-300' :
+                       isMed ? 'bg-amber-100 text-amber-800 border-amber-300' :
+                       'bg-emerald-100 text-emerald-800 border-emerald-300';
+
+    const iconClass = isCritical ? 'bg-rose-50 text-rose-600 border-rose-200' :
+                      isHigh ? 'bg-orange-50 text-orange-600 border-orange-200' :
+                      isMed ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                      'bg-emerald-50 text-emerald-600 border-emerald-200';
+
+    if (badge) {
+        badge.className = `px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeColor}`;
+        badge.textContent = `Chain of Responsibility: ${isCritical ? 'Tier 4' : isHigh ? 'Tier 3' : isMed ? 'Tier 2' : 'Tier 1'}`;
+    }
+    if (title) {
+        title.textContent = 'Incident Dispatched & Escalated!';
+    }
+    if (icon) {
+        icon.className = `w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-xs shrink-0 border ${iconClass}`;
+        icon.innerHTML = `<i class="fa-solid ${isCritical ? 'fa-triangle-exclamation animate-pulse' : 'fa-circle-check'}"></i>`;
+    }
+
+    if (body) {
+        body.innerHTML = `
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                <span class="font-mono font-bold text-slate-800 text-xs">${complaint.id || 'CMP-NEW'}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${complaint.severity}</span>
+            </div>
+            <div>
+                <p class="font-bold text-slate-900 text-[13px]">${escapeHtml(complaint.title || '')}</p>
+                <p class="text-slate-500 text-[11px] mt-0.5 flex items-center gap-1">
+                    <i class="fa-solid fa-location-dot text-slate-400"></i> ${escapeHtml(complaint.location || '')}
+                </p>
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                <span class="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block">Escalated Dynamically & Resolved By:</span>
+                <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                    <strong class="text-emerald-700">${escapeHtml(complaint.resolvedBy || tierName)}</strong>
+                </span>
+            </div>
+            <div class="text-[10.5px] font-mono text-slate-500 flex items-center justify-between pt-0.5">
+                <span>Citizen: <strong class="text-slate-700">${escapeHtml(complaint.citizenName || '')}</strong></span>
+                <span>Contact: <strong class="text-slate-700">${escapeHtml(complaint.contactNumber || '')}</strong></span>
+            </div>
+        `;
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function showAppAlert(title, message, type = 'warning') {
+    const modal = document.getElementById('themeConfirmModal');
+    const badge = document.getElementById('confirmModalBadge');
+    const titleEl = document.getElementById('confirmModalTitle');
+    const icon = document.getElementById('confirmModalIcon');
+    const body = document.getElementById('confirmModalBody');
+    if (!modal) return;
+
+    if (badge) {
+        badge.className = type === 'warning' ? 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300' : 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300';
+        badge.textContent = type === 'warning' ? 'Attention Required' : 'Validation Error';
+    }
+    if (titleEl) titleEl.textContent = title;
+    if (icon) {
+        icon.className = type === 'warning' ? 'w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-xs shrink-0 border bg-amber-50 text-amber-600 border-amber-200' : 'w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-xs shrink-0 border bg-rose-50 text-rose-600 border-rose-200';
+        icon.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i>`;
+    }
+    if (body) {
+        body.innerHTML = `
+            <p class="text-xs font-semibold text-slate-700 leading-relaxed py-1">${escapeHtml(message)}</p>
+        `;
+    }
+    modal.classList.remove('hidden');
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('themeConfirmModal');
+    if (modal) modal.classList.add('hidden');
+}
+window.closeConfirmModal = closeConfirmModal;
+window.showAppAlert = showAppAlert;
+window.showIncidentConfirmModal = showIncidentConfirmModal;
+
+function resetComplaintForm() {
+    const nameInput = document.getElementById('cCitizenName');
+    const contactInput = document.getElementById('cContact');
+    const titleInput = document.getElementById('cTitle');
+    const locationInput = document.getElementById('cLocation');
+    const severityInput = document.getElementById('cSeverity');
+
+    if (nameInput) nameInput.value = '';
+    if (contactInput) contactInput.value = '';
+    if (titleInput) titleInput.value = '';
+    if (locationInput) locationInput.value = '';
+    if (severityInput) severityInput.value = '';
+
+    const selectedText = document.getElementById('severitySelectedText');
+    const selectedDot = document.getElementById('severitySelectedDot');
+    if (selectedText) {
+        selectedText.textContent = '-- Please Select Incident Severity Level --';
+        selectedText.className = 'truncate font-semibold text-slate-400';
+    }
+    if (selectedDot) {
+        selectedDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0';
     }
 }
 
 // ==========================================
 // PART D: FLYWEIGHT PATTERN (Streetlights Fleet)
 // ==========================================
-async function runRamProfile() {
+function toggleScaleMenu() {
+    const menu = document.getElementById('scaleMenu');
+    const chevron = document.getElementById('scaleChevron');
+    if (!menu) return;
+    const isHidden = menu.classList.contains('hidden');
+    if (isHidden) {
+        menu.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-180');
+    } else {
+        menu.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
+    }
+}
+window.toggleScaleMenu = toggleScaleMenu;
+
+let activeProfiledFleetCount = 50000;
+
+function selectScaleOption(val, label) {
+    const input = document.getElementById('streetScaleSelect');
+    const selectedText = document.getElementById('scaleSelectedText');
+    const btn = document.getElementById('btnSpawnFleet');
+    const triggerIcon = document.querySelector('#scaleTrigger i.fa-lightbulb');
+
+    if (input) input.value = val;
+    if (selectedText) selectedText.textContent = label;
+
+    // Update trigger icon color according to selected tier
+    if (triggerIcon) {
+        if (val === '50000') triggerIcon.className = 'fa-solid fa-lightbulb text-emerald-500 text-[11px] shrink-0';
+        else if (val === '25000') triggerIcon.className = 'fa-solid fa-lightbulb text-amber-500 text-[11px] shrink-0';
+        else triggerIcon.className = 'fa-solid fa-lightbulb text-sky-500 text-[11px] shrink-0';
+    }
+
+    toggleScaleMenu();
+
+    // IMPORTANT: Do NOT automatically calculate or update RAM cards on dropdown select!
+    // The profiler metrics (Baseline, Optimized, Preserved) must only update when the user clicks "Spawn & Profile Fleet".
+    if (btn) {
+        const countFormatted = parseInt(val).toLocaleString();
+        btn.innerHTML = `<i class="fa-solid fa-microchip animate-pulse"></i> Spawn & Profile ${countFormatted} Fleet`;
+        btn.classList.add('ring-2', 'ring-emerald-400', 'ring-offset-1');
+    }
+}
+window.selectScaleOption = selectScaleOption;
+
+async function runRamProfile(isManualClick = false) {
     const scaleSelect = document.getElementById('streetScaleSelect');
     const scale = parseInt(scaleSelect ? scaleSelect.value : 50000) || 50000;
+    const btn = document.getElementById('btnSpawnFleet');
+    const feedback = document.getElementById('profilerFeedback');
+    const feedbackMsg = document.getElementById('profilerFeedbackMsg');
+
+    if (isManualClick && btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-white"></i> Spawning & Profiling...`;
+        btn.classList.add('opacity-80', 'cursor-wait');
+        btn.classList.remove('ring-2', 'ring-emerald-400', 'ring-offset-1');
+
+        // Visual radar sweep/ping on the interactive canvas nodes
+        document.querySelectorAll('.light-node-point').forEach(el => {
+            el.classList.add('scale-125');
+            setTimeout(() => el.classList.remove('scale-125'), 400);
+        });
+    }
 
     let count = scale;
     try {
@@ -1378,19 +1749,71 @@ async function runRamProfile() {
         console.warn('Part D scale endpoint offline. Running verified Flyweight benchmark for ' + scale + ' nodes.');
     }
 
+    if (isManualClick) {
+        await new Promise(r => setTimeout(r, 400));
+    }
+
+    activeProfiledFleetCount = count;
+
     const unoptimizedMb = (count * 0.000878).toFixed(1);
     const flyweightMb = (1.81 * (count / 50000)).toFixed(2);
     const savedMb = (parseFloat(unoptimizedMb) - parseFloat(flyweightMb)).toFixed(1);
+    const scaleFormatted = count.toLocaleString();
 
     const unoptEl = document.getElementById('unoptimizedHeapText');
+    const unoptSubEl = document.getElementById('unoptimizedSubText');
     const flyEl = document.getElementById('flyweightHeapText');
     const presEl = document.getElementById('preservedPercentText');
     const savedMbEl = document.getElementById('savedMegabytesText');
+    const fleetStatusEl = document.getElementById('fleetStatusText');
+    const filterAllCountEl = document.getElementById('filterAllCount');
 
-    if (unoptEl) unoptEl.textContent = unoptimizedMb + ' MB';
-    if (flyEl) flyEl.textContent = flyweightMb + ' MB';
+    if (unoptEl) {
+        unoptEl.textContent = unoptimizedMb + ' MB';
+        unoptEl.classList.add('text-rose-600');
+        setTimeout(() => unoptEl.classList.remove('text-rose-600'), 500);
+    }
+    if (unoptSubEl) unoptSubEl.textContent = `${scaleFormatted} unpooled instances`;
+    if (flyEl) {
+        flyEl.textContent = flyweightMb + ' MB';
+        flyEl.classList.add('text-emerald-600');
+        setTimeout(() => flyEl.classList.remove('text-emerald-600'), 500);
+    }
     if (presEl) presEl.textContent = '95.9%';
     if (savedMbEl) savedMbEl.textContent = `${savedMb} MB RAM saved across municipal grid`;
+    if (fleetStatusEl) fleetStatusEl.textContent = `Fleet Status: ${scaleFormatted} Nodes Operational (${currentDimLevel}% Lumens)`;
+    if (filterAllCountEl) filterAllCountEl.textContent = count >= 1000 ? `${(count/1000).toFixed(0)}k` : count;
+
+    // Update bottom Master Luminaire registry counts dynamically
+    const warmRatio = 0.4824; // 24,120 / 50,000
+    const highRatio = 0.3280; // 16,400 / 50,000
+    const solarRatio = 0.1896; // 9,480 / 50,000
+
+    const warmEl = document.getElementById('tableWarmCount');
+    const highEl = document.getElementById('tableHighCount');
+    const solarEl = document.getElementById('tableSolarCount');
+
+    if (warmEl) warmEl.textContent = `${Math.round(count * warmRatio).toLocaleString()} Streetlights`;
+    if (highEl) highEl.textContent = `${Math.round(count * highRatio).toLocaleString()} Streetlights`;
+    if (solarEl) solarEl.textContent = `${Math.round(count * solarRatio).toLocaleString()} Streetlights`;
+
+    if (isManualClick && btn) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-80', 'cursor-wait');
+        btn.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-200"></i> Profiled ${scaleFormatted} Nodes!`;
+
+        if (feedback && feedbackMsg) {
+            feedbackMsg.textContent = `${scaleFormatted} nodes spawned: ${savedMb} MB RAM saved!`;
+            feedback.classList.remove('hidden');
+            setTimeout(() => {
+                feedback.classList.add('hidden');
+            }, 3500);
+        }
+
+        setTimeout(() => {
+            btn.innerHTML = `<i class="fa-solid fa-microchip"></i> Spawn & Profile Fleet`;
+        }, 1800);
+    }
 }
 
 // ==========================================
@@ -1399,26 +1822,59 @@ async function runRamProfile() {
 let currentDimLevel = 100;
 let currentFilterType = 'ALL';
 let isFleetOn = true;
+let selectedStreetlightId = 'SL-COL-1001';
 
+// 42 Realistically Mapped Municipal Streetlight Nodes Lined Along City Corridors
 const streetlightNodesData = [
-    { id: 'SL-COL-1021', type: 'WARM', model: '90W Warm LED', zone: 'Downtown Core', lat: '6.9271', lon: '79.8612', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
-    { id: 'SL-COL-1022', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101', lat: '6.9315', lon: '79.8650', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
-    { id: 'SL-COL-1023', type: 'SOLAR', model: '60W Solar LED', zone: 'Eco Parkway', lat: '6.9150', lon: '79.8720', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
-    { id: 'SL-COL-1024', type: 'WARM', model: '90W Warm LED', zone: 'Downtown Core', lat: '6.9280', lon: '79.8625', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
-    { id: 'SL-COL-1025', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101', lat: '6.9320', lon: '79.8660', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
-    { id: 'SL-COL-1026', type: 'WARM', model: '90W Warm LED', zone: 'Civic Square', lat: '6.9295', lon: '79.8630', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
-    { id: 'SL-COL-1027', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101', lat: '6.9330', lon: '79.8675', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
-    { id: 'SL-COL-1028', type: 'WARM', model: '90W Warm LED', zone: 'Downtown Core', lat: '6.9265', lon: '79.8605', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
-    { id: 'SL-COL-1029', type: 'SOLAR', model: '60W Solar LED', zone: 'Eco Parkway', lat: '6.9160', lon: '79.8735', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
-    { id: 'SL-COL-1030', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101', lat: '6.9340', lon: '79.8690', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
-    { id: 'SL-COL-1031', type: 'WARM', model: '90W Warm LED', zone: 'Downtown Core', lat: '6.9255', lon: '79.8595', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
-    { id: 'SL-COL-1032', type: 'SOLAR', model: '60W Solar LED', zone: 'Eco Parkway', lat: '6.9175', lon: '79.8750', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
-    { id: 'SL-COL-1033', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101', lat: '6.9350', lon: '79.8705', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
-    { id: 'SL-COL-1034', type: 'SOLAR', model: '60W Solar LED', zone: 'Eco Parkway', lat: '6.9185', lon: '79.8765', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
-    { id: 'SL-COL-1035', type: 'WARM', model: '90W Warm LED', zone: 'Civic Square', lat: '6.9288', lon: '79.8640', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
-    { id: 'SL-COL-1036', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101', lat: '6.9360', lon: '79.8720', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
-    { id: 'SL-COL-1037', type: 'WARM', model: '90W Warm LED', zone: 'Downtown Core', lat: '6.9245', lon: '79.8585', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
-    { id: 'SL-COL-1038', type: 'SOLAR', model: '60W Solar LED', zone: 'Eco Parkway', lat: '6.9195', lon: '79.8780', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' }
+    // Galle Road Corridor (90W Warm LED - Commercial District, BOC HQ & Cinnamon Grand)
+    { id: 'SL-COL-1001', type: 'WARM', model: '90W Warm LED', zone: 'Galle Rd • BOC HQ Sector', x: 18, y: 8, lat: '6.9271', lon: '79.8612', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1002', type: 'WARM', model: '90W Warm LED', zone: 'Galle Rd • Commercial Hub', x: 22, y: 18, lat: '6.9275', lon: '79.8614', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1003', type: 'WARM', model: '90W Warm LED', zone: 'Galle Rd • Hotel Corridor', x: 18, y: 28, lat: '6.9280', lon: '79.8618', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1004', type: 'WARM', model: '90W Warm LED', zone: 'Galle Rd • Cinnamon Grand', x: 22, y: 38, lat: '6.9285', lon: '79.8622', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1005', type: 'WARM', model: '90W Warm LED', zone: 'Galle Rd • South Junction', x: 18, y: 62, lat: '6.9255', lon: '79.8608', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1006', type: 'WARM', model: '90W Warm LED', zone: 'Galle Rd • Commercial Core', x: 22, y: 72, lat: '6.9248', lon: '79.8601', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1007', type: 'WARM', model: '90W Warm LED', zone: 'Galle Rd • Market Sector', x: 18, y: 82, lat: '6.9240', lon: '79.8595', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1008', type: 'WARM', model: '90W Warm LED', zone: 'Galle Rd • South Gate', x: 22, y: 90, lat: '6.9232', lon: '79.8590', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+
+    // Lotus Road Arterial (90W Warm LED - World Trade Center & Financial Hub)
+    { id: 'SL-COL-1011', type: 'WARM', model: '90W Warm LED', zone: 'Lotus Rd • North Gate', x: 45, y: 10, lat: '6.9300', lon: '79.8635', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1012', type: 'WARM', model: '90W Warm LED', zone: 'Lotus Rd • WTC Tower A', x: 49, y: 20, lat: '6.9308', lon: '79.8640', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1013', type: 'WARM', model: '90W Warm LED', zone: 'Lotus Rd • Financial Core', x: 45, y: 32, lat: '6.9315', lon: '79.8645', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1014', type: 'WARM', model: '90W Warm LED', zone: 'Lotus Rd • Central Link', x: 49, y: 64, lat: '6.9290', lon: '79.8630', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1015', type: 'WARM', model: '90W Warm LED', zone: 'Lotus Rd • Civic Link', x: 45, y: 76, lat: '6.9282', lon: '79.8625', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1016', type: 'WARM', model: '90W Warm LED', zone: 'Lotus Rd • South Corner', x: 49, y: 85, lat: '6.9275', lon: '79.8620', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+
+    // Duplication Road Boulevard (90W Warm LED - Tech Innovation District & Telecom)
+    { id: 'SL-COL-1021', type: 'WARM', model: '90W Warm LED', zone: 'Duplication Rd • Virtusa Campus', x: 76, y: 8, lat: '6.9260', lon: '79.8685', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1022', type: 'WARM', model: '90W Warm LED', zone: 'Duplication Rd • Tech Hub', x: 80, y: 18, lat: '6.9265', lon: '79.8690', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1023', type: 'WARM', model: '90W Warm LED', zone: 'Duplication Rd • Software Corridor', x: 76, y: 28, lat: '6.9270', lon: '79.8695', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1024', type: 'WARM', model: '90W Warm LED', zone: 'Duplication Rd • Telecom Center', x: 80, y: 38, lat: '6.9275', lon: '79.8700', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1025', type: 'WARM', model: '90W Warm LED', zone: 'Duplication Rd • Innovation Way', x: 76, y: 62, lat: '6.9250', lon: '79.8678', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1026', type: 'WARM', model: '90W Warm LED', zone: 'Duplication Rd • Tech Park South', x: 80, y: 72, lat: '6.9242', lon: '79.8670', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1027', type: 'WARM', model: '90W Warm LED', zone: 'Duplication Rd • Data Center', x: 76, y: 82, lat: '6.9235', lon: '79.8665', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+    { id: 'SL-COL-1028', type: 'WARM', model: '90W Warm LED', zone: 'Duplication Rd • Campus East', x: 80, y: 90, lat: '6.9228', lon: '79.8660', spec: 'Philips Lumileds • 3000K • 9,500 lm', color: 'amber' },
+
+    // Highway 101 Expressway (150W High-Mast LED - High-Speed Arterial Cross-Town)
+    { id: 'SL-COL-1031', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • West Terminal', x: 6, y: 46, lat: '6.9320', lon: '79.8550', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1032', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • Port Access', x: 12, y: 54, lat: '6.9322', lon: '79.8570', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1033', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • Galle Interchange', x: 27, y: 46, lat: '6.9325', lon: '79.8620', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1034', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • Overpass 1', x: 33, y: 54, lat: '6.9328', lon: '79.8640', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1035', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • Mid-Span West', x: 40, y: 46, lat: '6.9330', lon: '79.8660', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1036', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • Lotus Junction', x: 53, y: 54, lat: '6.9335', lon: '79.8700', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1037', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • Civic Overpass', x: 60, y: 46, lat: '6.9338', lon: '79.8720', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1038', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • Tech Interchange', x: 71, y: 54, lat: '6.9342', lon: '79.8750', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1039', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • Tech Flyover', x: 84, y: 46, lat: '6.9345', lon: '79.8780', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+    { id: 'SL-COL-1040', type: 'HIGH', model: '150W High-Mast LED', zone: 'Highway 101 • East Tollway', x: 92, y: 54, lat: '6.9350', lon: '79.8820', spec: 'Osram Streetlight • 5000K • 16,000 lm', color: 'sky' },
+
+    // Marine Drive Coastal Strip & Regent Street (60W Solar LED - Eco Parkway & Health Access)
+    { id: 'SL-COL-1041', type: 'SOLAR', model: '60W Solar LED', zone: 'Marine Drive • Eco Park West', x: 26, y: 92, lat: '6.9150', lon: '79.8580', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
+    { id: 'SL-COL-1042', type: 'SOLAR', model: '60W Solar LED', zone: 'Marine Drive • Coastal Trail', x: 33, y: 92, lat: '6.9155', lon: '79.8600', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
+    { id: 'SL-COL-1043', type: 'SOLAR', model: '60W Solar LED', zone: 'Marine Drive • Seaside Pier', x: 40, y: 92, lat: '6.9160', lon: '79.8620', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
+    { id: 'SL-COL-1044', type: 'SOLAR', model: '60W Solar LED', zone: 'Marine Drive • Parkway Center', x: 54, y: 92, lat: '6.9165', lon: '79.8650', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
+    { id: 'SL-COL-1045', type: 'SOLAR', model: '60W Solar LED', zone: 'Marine Drive • Green Strip', x: 61, y: 92, lat: '6.9170', lon: '79.8670', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
+    { id: 'SL-COL-1046', type: 'SOLAR', model: '60W Solar LED', zone: 'Marine Drive • Eco Trail East', x: 68, y: 92, lat: '6.9175', lon: '79.8690', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
+    { id: 'SL-COL-1047', type: 'SOLAR', model: '60W Solar LED', zone: 'Regent St • Hospital Entrance', x: 35, y: 72, lat: '6.9180', lon: '79.8710', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' },
+    { id: 'SL-COL-1048', type: 'SOLAR', model: '60W Solar LED', zone: 'Regent St • Ambulance Corridor', x: 35, y: 82, lat: '6.9188', lon: '79.8730', spec: 'Cree Lighting • 4000K • 6,200 lm', color: 'emerald' }
 ];
 
 function initStreetlightGrid() {
@@ -1429,29 +1885,93 @@ function initStreetlightGrid() {
     streetlightNodesData.forEach(node => {
         const btn = document.createElement('button');
         btn.id = `node-${node.id}`;
-        btn.className = `light-node-point group relative flex items-center justify-center p-2 rounded-full cursor-pointer transition-all duration-300`;
         btn.setAttribute('data-type', node.type);
         btn.onclick = () => selectLightNode(node);
 
-        const glowClass = node.color === 'amber' ? 'bg-amber-400 shadow-[0_0_12px_#F59E0B]' :
-                         node.color === 'sky' ? 'bg-sky-400 shadow-[0_0_14px_#38BDF8]' :
-                         'bg-emerald-400 shadow-[0_0_10px_#34D399]';
+        // Position absolutely along the realistic road coordinates
+        btn.style.left = `${node.x}%`;
+        btn.style.top = `${node.y}%`;
+        btn.className = `light-node-point absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer transition-all duration-300 z-10`;
 
         btn.innerHTML = `
-            <span class="w-3.5 h-3.5 rounded-full ${glowClass} transition-transform duration-300 group-hover:scale-150"></span>
-            <span class="absolute -top-7 hidden group-hover:flex bg-slate-900 text-white text-[9px] font-mono px-2 py-0.5 rounded shadow-lg whitespace-nowrap z-30 border border-slate-700 pointer-events-none">
-                ${node.model} (${node.zone})
-            </span>
+            <div class="relative flex items-center justify-center">
+                <!-- Outer Pulse Aura on Active/Selected -->
+                <span class="pulse-aura absolute -inset-1 rounded-full opacity-40"></span>
+                
+                <!-- Streetlight Head (Lamp Bulb / Fixture) -->
+                <span class="lamp-head relative w-3.5 h-3.5 rounded-full border-2 transition-transform duration-200 group-hover:scale-150"></span>
+
+                <!-- Hover Tooltip in Dark Theme -->
+                <div class="absolute -top-7 hidden group-hover:flex bg-slate-900 text-white text-[9px] font-mono px-2 py-0.5 rounded shadow-lg whitespace-nowrap z-30 pointer-events-none border border-slate-700">
+                    <span class="font-bold text-amber-300 mr-1">${node.id}</span> ${node.zone}
+                </div>
+            </div>
         `;
         container.appendChild(btn);
     });
 
     if (streetlightNodesData.length > 0) {
         selectLightNode(streetlightNodesData[0]);
+    } else {
+        updateStreetlightsVisuals();
     }
 }
 
+function updateStreetlightsVisuals() {
+    streetlightNodesData.forEach(node => {
+        const btn = document.getElementById(`node-${node.id}`);
+        if (!btn) return;
+        const isSelected = node.id === selectedStreetlightId;
+        const head = btn.querySelector('.lamp-head');
+        const aura = btn.querySelector('.pulse-aura');
+        if (!head) return;
+
+        const isMatch = currentFilterType === 'ALL' || node.type === currentFilterType;
+
+        if (!isMatch) {
+            btn.style.opacity = '0.2';
+            btn.style.transform = 'translate(-50%, -50%) scale(0.7)';
+            return;
+        } else {
+            btn.style.transform = isSelected ? 'translate(-50%, -50%) scale(1.3)' : 'translate(-50%, -50%) scale(1)';
+        }
+
+        if (currentDimLevel === 100) {
+            // 100% Peak Lumens - Vibrant luminous glowing bulb
+            btn.style.opacity = '1.0';
+            const lampGlow = node.color === 'amber' ? 'bg-amber-400 border-amber-300 shadow-[0_0_12px_#F59E0B]' :
+                             node.color === 'sky' ? 'bg-sky-400 border-sky-300 shadow-[0_0_12px_#38BDF8]' :
+                             'bg-emerald-400 border-emerald-300 shadow-[0_0_12px_#34D399]';
+            head.className = `lamp-head relative w-3.5 h-3.5 rounded-full border-2 ${lampGlow} transition-all duration-300 ${isSelected ? 'ring-2 ring-white scale-125' : ''}`;
+            if (aura) {
+                aura.className = `pulse-aura absolute -inset-1 rounded-full ${lampGlow} opacity-50 ${isSelected ? 'animate-ping' : ''}`;
+            }
+        } else if (currentDimLevel === 50) {
+            // 50% Eco Lumens - Bulb remains completely colored & visible, soft glow, opacity 0.9!
+            btn.style.opacity = '0.9';
+            const lampGlow = node.color === 'amber' ? 'bg-amber-400/90 border-amber-300/80 shadow-[0_0_6px_#F59E0B]' :
+                             node.color === 'sky' ? 'bg-sky-400/90 border-sky-300/80 shadow-[0_0_6px_#38BDF8]' :
+                             'bg-emerald-400/90 border-emerald-300/80 shadow-[0_0_6px_#34D399]';
+            head.className = `lamp-head relative w-3.5 h-3.5 rounded-full border-2 ${lampGlow} transition-all duration-300 ${isSelected ? 'ring-2 ring-white scale-125' : ''}`;
+            if (aura) {
+                aura.className = `pulse-aura absolute -inset-0.5 rounded-full ${lampGlow} opacity-30 ${isSelected ? 'animate-ping' : ''}`;
+            }
+        } else {
+            // 0% OFF (Grid Standby) - Solid metallic municipal lamp fixture on pole. Never disappears!
+            // Opacity stays 0.85 so every single fixture is clearly visible on the street!
+            btn.style.opacity = '0.85';
+            head.className = `lamp-head relative w-3.5 h-3.5 rounded-full border-2 border-slate-400 bg-slate-700 shadow-none transition-all duration-300 ${isSelected ? 'ring-2 ring-amber-400 scale-125' : ''}`;
+            if (aura) {
+                aura.className = `pulse-aura hidden`;
+            }
+        }
+    });
+}
+
 function selectLightNode(node) {
+    selectedStreetlightId = node.id;
+    updateStreetlightsVisuals();
+
     const idEl = document.getElementById('inspectorNodeId');
     const badgeEl = document.getElementById('inspectorBadge');
     const detailsEl = document.getElementById('inspectorDetails');
@@ -1461,17 +1981,17 @@ function selectLightNode(node) {
     if (idEl) idEl.textContent = `Selected Node: #${node.id}`;
     if (badgeEl) {
         badgeEl.textContent = node.model;
-        badgeEl.className = node.color === 'amber' ? 'px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40' :
-                           node.color === 'sky' ? 'px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40' :
-                           'px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        badgeEl.className = node.color === 'amber' ? 'px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0' :
+                           node.color === 'sky' ? 'px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-100 text-sky-800 border border-sky-300 shrink-0' :
+                           'px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0';
     }
     if (iconEl) {
-        iconEl.className = node.color === 'amber' ? 'w-8 h-8 rounded-lg bg-amber-400/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-400/40 shadow-[0_0_10px_rgba(245,158,11,0.3)]' :
-                           node.color === 'sky' ? 'w-8 h-8 rounded-lg bg-sky-400/20 text-sky-400 flex items-center justify-center text-sm font-bold border border-sky-400/40 shadow-[0_0_10px_rgba(56,189,248,0.3)]' :
-                           'w-8 h-8 rounded-lg bg-emerald-400/20 text-emerald-400 flex items-center justify-center text-sm font-bold border border-emerald-400/40 shadow-[0_0_10px_rgba(52,211,153,0.3)]';
+        iconEl.className = node.color === 'amber' ? 'w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold border border-amber-300 shadow-xs shrink-0' :
+                           node.color === 'sky' ? 'w-9 h-9 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-sm font-bold border border-sky-300 shadow-xs shrink-0' :
+                           'w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold border border-emerald-300 shadow-xs shrink-0';
     }
     if (detailsEl) {
-        detailsEl.textContent = `Hardware: ${node.spec} • Shared Singleton Pool • Extrinsic: Lat ${node.lat}, Lon ${node.lon}`;
+        detailsEl.textContent = `Hardware: ${node.spec} • Extrinsic: Lat ${node.lat}, Lon ${node.lon}`;
     }
     if (lumensEl) {
         lumensEl.textContent = isFleetOn ? `${currentDimLevel}% (${currentDimLevel === 100 ? 'Peak' : 'Eco'} Lumens)` : '0% (Lights OFF)';
@@ -1480,25 +2000,16 @@ function selectLightNode(node) {
 
 function filterLuminaire(type) {
     currentFilterType = type;
-    document.querySelectorAll('.light-node-point').forEach(el => {
-        const nodeType = el.getAttribute('data-type');
-        if (type === 'ALL' || nodeType === type) {
-            el.style.opacity = isFleetOn ? (currentDimLevel / 100) : '0.15';
-            el.style.transform = 'scale(1)';
-        } else {
-            el.style.opacity = '0.12';
-            el.style.transform = 'scale(0.8)';
-        }
-    });
+    updateStreetlightsVisuals();
 
     const filters = ['all', 'warm', 'high', 'solar'];
     filters.forEach(f => {
         const btn = document.getElementById(`filter-${f}`);
         if (btn) {
             if (f.toUpperCase() === type || (f === 'all' && type === 'ALL')) {
-                btn.className = 'px-3 py-1 rounded-lg font-bold text-[11px] bg-amber-100 text-amber-900 transition';
+                btn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] bg-amber-100 text-amber-900 transition shadow-xs';
             } else {
-                btn.className = 'px-3 py-1 rounded-lg font-semibold text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5';
+                btn.className = 'px-2.5 py-1 rounded-lg font-semibold text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5';
             }
         }
     });
@@ -1512,28 +2023,23 @@ function setFleetDimming(level) {
         const btn = document.getElementById(`dim-${lvl}`);
         if (btn) {
             if (lvl === level) {
-                btn.className = 'px-2.5 py-1 rounded-lg bg-neutral-900 text-white transition';
+                btn.className = 'px-2 py-1 rounded-lg bg-neutral-900 text-white transition text-[10px] font-bold shadow-xs';
             } else {
-                btn.className = 'px-2.5 py-1 rounded-lg text-slate-500 hover:text-neutral-900 transition';
+                btn.className = 'px-2 py-1 rounded-lg text-slate-500 hover:text-neutral-900 transition text-[10px]';
             }
         }
     });
 
-    document.querySelectorAll('.light-node-point').forEach(el => {
-        const nodeType = el.getAttribute('data-type');
-        const matchesFilter = currentFilterType === 'ALL' || nodeType === currentFilterType;
-        if (matchesFilter) {
-            el.style.opacity = isFleetOn ? (level / 100) : '0.15';
-        }
-    });
+    updateStreetlightsVisuals();
 
-    const statusEl = document.getElementById('fleetStatusText');
     const lumensEl = document.getElementById('inspectorLumens');
-    if (statusEl) {
-        statusEl.textContent = level === 0 ? 'Fleet Status: All Lights OFF (0% Lumens)' : `Fleet Status: 50,000 Nodes Operational (${level}% Lumens)`;
-    }
     if (lumensEl) {
-        lumensEl.textContent = level === 0 ? '0% (Lights OFF)' : `${level}% (${level === 100 ? 'Peak' : 'Eco'} Lumens)`;
+        lumensEl.textContent = isFleetOn ? `${currentDimLevel}% (${currentDimLevel === 100 ? 'Peak' : 'Eco'} Lumens)` : '0% (Lights OFF)';
+    }
+
+    const fleetStatusEl = document.getElementById('fleetStatusText');
+    if (fleetStatusEl) {
+        fleetStatusEl.textContent = isFleetOn ? `Fleet Status: ${activeProfiledFleetCount.toLocaleString()} Nodes Operational (${currentDimLevel}% Lumens)` : `Fleet Status: ${activeProfiledFleetCount.toLocaleString()} Nodes Standby (Grid OFF)`;
     }
 }
 
@@ -1548,6 +2054,133 @@ function toggleAllLights() {
 // ==========================================
 // PART E: INTERPRETER PATTERN (Policy DSL)
 // ==========================================
+let clientMunicipalPolicies = [
+    { policyId: "POL-01", dslRule: "NOISE_LEVEL > 75 AND TIME_HOUR >= 22" },
+    { policyId: "POL-02", dslRule: "PARKING_DURATION > 120 OR VEHICLE_TYPE == COMMERCIAL" },
+    { policyId: "POL-03", dslRule: "AIR_AQI > 150 AND SENSOR_ZONE == INDUSTRIAL" }
+];
+
+function openAddPolicyModal() {
+    const modal = document.getElementById('addOrdinanceModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    const feedback = document.getElementById('addPolicyFeedback');
+    if (feedback) feedback.classList.add('hidden');
+    setTimeout(() => {
+        document.getElementById('newPolicyRule')?.focus();
+    }, 100);
+}
+window.openAddPolicyModal = openAddPolicyModal;
+
+function closeAddPolicyModal() {
+    const modal = document.getElementById('addOrdinanceModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+}
+window.closeAddPolicyModal = closeAddPolicyModal;
+
+function setPresetRule(rule) {
+    const ruleInput = document.getElementById('newPolicyRule');
+    if (ruleInput) {
+        ruleInput.value = rule;
+        ruleInput.focus();
+    }
+}
+window.setPresetRule = setPresetRule;
+
+async function submitNewMunicipalPolicy() {
+    const idInput = document.getElementById('newPolicyId');
+    const ruleInput = document.getElementById('newPolicyRule');
+    const feedback = document.getElementById('addPolicyFeedback');
+
+    const rule = ruleInput?.value.trim();
+    if (!rule) {
+        if (feedback) {
+            feedback.className = 'text-[11px] font-semibold px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 block';
+            feedback.textContent = 'Please enter a valid DSL rule (e.g. PARKING_DURATION > 45 AND TIME_HOUR > 18)';
+        }
+        return;
+    }
+
+    const id = idInput?.value.trim() || '';
+
+    try {
+        const res = await fetch(`/api/part-e/add-policy?policyId=${encodeURIComponent(id)}&dslRule=${encodeURIComponent(rule)}`, {
+            method: 'POST'
+        });
+        const data = await res.json();
+        if (data.success) {
+            if (ruleInput) ruleInput.value = '';
+            if (idInput) idInput.value = '';
+            closeAddPolicyModal();
+            await evaluateTelemetry();
+        } else {
+            if (feedback) {
+                feedback.className = 'text-[11px] font-semibold px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 block';
+                feedback.textContent = data.message || 'Failed to parse rule syntax';
+            }
+        }
+    } catch (err) {
+        console.warn('Backend offline, registering in local state:', err);
+        const newId = id || `POL-0${clientMunicipalPolicies.length + 1}`;
+        clientMunicipalPolicies.push({ policyId: newId, dslRule: rule });
+        if (ruleInput) ruleInput.value = '';
+        if (idInput) idInput.value = '';
+        closeAddPolicyModal();
+        await evaluateTelemetry();
+    }
+}
+window.submitNewMunicipalPolicy = submitNewMunicipalPolicy;
+
+async function deleteMunicipalPolicy(policyId) {
+    if (!policyId) return;
+    try {
+        await fetch(`/api/part-e/delete-policy/${encodeURIComponent(policyId)}`, { method: 'DELETE' });
+    } catch (e) {
+        console.warn('Delete policy offline:', e);
+    }
+    clientMunicipalPolicies = clientMunicipalPolicies.filter(p => p.policyId !== policyId);
+    await evaluateTelemetry();
+}
+window.deleteMunicipalPolicy = deleteMunicipalPolicy;
+
+async function resetDefaultPolicies() {
+    try {
+        await fetch('/api/part-e/reset-policies', { method: 'POST' });
+    } catch (e) {
+        console.warn('Reset policies offline:', e);
+    }
+    clientMunicipalPolicies = [
+        { policyId: "POL-01", dslRule: "NOISE_LEVEL > 75 AND TIME_HOUR >= 22" },
+        { policyId: "POL-02", dslRule: "PARKING_DURATION > 120 OR VEHICLE_TYPE == COMMERCIAL" },
+        { policyId: "POL-03", dslRule: "AIR_AQI > 150 AND SENSOR_ZONE == INDUSTRIAL" }
+    ];
+    await evaluateTelemetry();
+}
+window.resetDefaultPolicies = resetDefaultPolicies;
+
+function evaluateDslRuleClientSide(rule, sensorPayload) {
+    let isViolated = false;
+    try {
+        let expr = rule;
+        for (const [k, v] of Object.entries(sensorPayload)) {
+            const regex = new RegExp(`\\b${k}\\b`, 'g');
+            if (typeof v === 'string') {
+                expr = expr.replace(regex, `"${v.toUpperCase()}"`);
+            } else {
+                expr = expr.replace(regex, v);
+            }
+        }
+        expr = expr.replace(/\bAND\b/gi, '&&').replace(/\bOR\b/gi, '||');
+        expr = expr.replace(/([^><!=])=([^=])/g, '$1==$2');
+        isViolated = Boolean(Function(`"use strict"; return (${expr})`)());
+    } catch(e) {
+        console.warn('Fallback eval failed for:', rule, e);
+        isViolated = false;
+    }
+    return isViolated;
+}
+
 function renderPolicyEvaluations(evaluations) {
     const container = document.getElementById('policyResultsContainer');
     if (!container) return;
@@ -1567,15 +2200,20 @@ function renderPolicyEvaluations(evaluations) {
 
         card.innerHTML = `
             <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center space-x-2">
-                    <span class="font-mono text-xs font-bold text-slate-800">${p.policyId}</span>
-                    <code class="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-mono font-semibold">${p.dslRule}</code>
+                <div class="flex items-center space-x-2 min-w-0">
+                    <span class="font-mono text-xs font-bold text-slate-800 shrink-0">${escapeHtml(p.policyId)}</span>
+                    <code class="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-mono font-semibold truncate">${escapeHtml(p.dslRule)}</code>
                 </div>
-                ${statusBadge}
+                <div class="flex items-center gap-2 shrink-0">
+                    ${statusBadge}
+                    <button type="button" onclick="deleteMunicipalPolicy('${escapeHtml(p.policyId)}')" class="text-slate-300 hover:text-rose-500 transition p-1 text-[11px] cursor-pointer" title="Remove Ordinance">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
             </div>
             <div class="text-xs font-mono text-slate-500 space-y-1 mt-2">
-                <div>Rule Logic Tree: <span class="text-emerald-700 font-semibold">${p.parsedAST}</span></div>
-                <div class="${isViolated ? 'text-rose-600 font-bold' : 'text-slate-500'}">${p.message}</div>
+                <div>Rule Logic Tree: <span class="text-emerald-700 font-semibold">${escapeHtml(p.parsedAST || ('(' + p.dslRule + ')'))}</span></div>
+                <div class="${isViolated ? 'text-rose-600 font-bold' : 'text-slate-500'}">${escapeHtml(p.message || (isViolated ? 'Policy conditions MET - Automated municipal action required!' : 'Policy conditions NOT met - Normal operations.'))}</div>
             </div>
         `;
         container.appendChild(card);
@@ -1600,46 +2238,93 @@ async function evaluateTelemetry() {
     } catch (err) {
         console.warn('Part E endpoint offline. Evaluating DSL rules in-engine client-side.');
 
-        const pol1Violated = (noise > 75 && hour >= 22);
-        const pol2Violated = (parking > 120 || vehicle === 'COMMERCIAL');
-        const pol3Violated = (aqi > 150 && zone === 'INDUSTRIAL');
+        const sensorPayload = {
+            "NOISE_LEVEL": noise,
+            "TIME_HOUR": hour,
+            "PARKING_DURATION": parking,
+            "VEHICLE_TYPE": vehicle,
+            "AIR_AQI": aqi,
+            "SENSOR_ZONE": zone
+        };
 
-        const fallbackEvaluations = [
-            {
-                policyId: "POL-01",
-                dslRule: "NOISE_LEVEL > 75 AND TIME_HOUR >= 22",
-                parsedAST: "(NOISE_LEVEL > 75.0 AND TIME_HOUR >= 22.0)",
-                violated: pol1Violated,
-                status: pol1Violated ? "VIOLATION_TRIGGERED" : "NORMAL_COMPLIANT",
-                message: pol1Violated 
-                    ? "Noise limit exceeded during restricted night hours! Automated enforcement alert dispatched." 
-                    : "Ambient noise levels comply with residential night regulations."
-            },
-            {
-                policyId: "POL-02",
-                dslRule: "PARKING_DURATION > 120 OR VEHICLE_TYPE == COMMERCIAL",
-                parsedAST: "(PARKING_DURATION > 120.0 OR VEHICLE_TYPE == COMMERCIAL)",
-                violated: pol2Violated,
-                status: pol2Violated ? "VIOLATION_TRIGGERED" : "NORMAL_COMPLIANT",
-                message: pol2Violated 
-                    ? "Overstay parking / commercial vehicle restriction triggered. Automated citation queued." 
-                    : "Compliant parking duration within authorized threshold."
-            },
-            {
-                policyId: "POL-03",
-                dslRule: "AIR_AQI > 150 AND SENSOR_ZONE == INDUSTRIAL",
-                parsedAST: "(AIR_AQI > 150.0 AND SENSOR_ZONE == INDUSTRIAL)",
-                violated: pol3Violated,
-                status: pol3Violated ? "VIOLATION_TRIGGERED" : "NORMAL_COMPLIANT",
-                message: pol3Violated 
-                    ? "High industrial air pollution detected! Factory emissions lockdown alert triggered." 
-                    : "Air quality index within municipal safety parameters."
-            }
-        ];
+        const fallbackEvaluations = clientMunicipalPolicies.map(item => {
+            const isViolated = evaluateDslRuleClientSide(item.dslRule, sensorPayload);
+            return {
+                policyId: item.policyId,
+                dslRule: item.dslRule,
+                parsedAST: `(${item.dslRule})`,
+                violated: isViolated,
+                status: isViolated ? "VIOLATION_TRIGGERED" : "NORMAL_COMPLIANT",
+                message: isViolated 
+                    ? "Policy conditions MET - Automated municipal action required!" 
+                    : "Policy conditions NOT met - Normal operations."
+            };
+        });
 
         renderPolicyEvaluations(fallbackEvaluations);
     }
 }
+
+// ==========================================
+// PART E: VEHICLE & ZONE DROPDOWN CONTROLS
+// ==========================================
+function toggleVehicleMenu() {
+    const menu = document.getElementById('vehicleMenu');
+    const chevron = document.getElementById('vehicleChevron');
+    if (!menu) return;
+    const isHidden = menu.classList.contains('hidden');
+    if (isHidden) {
+        menu.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-180');
+    } else {
+        menu.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
+    }
+}
+window.toggleVehicleMenu = toggleVehicleMenu;
+
+function selectVehicleOption(val, label, iconClass, color) {
+    const input = document.getElementById('sensorVehicle');
+    const textEl = document.getElementById('vehicleSelectedText');
+    const iconEl = document.getElementById('vehicleSelectedIcon');
+    if (input) input.value = val;
+    if (textEl) textEl.textContent = label;
+    if (iconEl) {
+        iconEl.className = `w-5 h-5 rounded-lg bg-${color}-50 text-${color}-600 flex items-center justify-center text-[10px] shrink-0 border border-${color}-200`;
+        iconEl.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+    }
+    toggleVehicleMenu();
+}
+window.selectVehicleOption = selectVehicleOption;
+
+function toggleZoneMenu() {
+    const menu = document.getElementById('zoneMenu');
+    const chevron = document.getElementById('zoneChevron');
+    if (!menu) return;
+    const isHidden = menu.classList.contains('hidden');
+    if (isHidden) {
+        menu.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-180');
+    } else {
+        menu.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
+    }
+}
+window.toggleZoneMenu = toggleZoneMenu;
+
+function selectZoneOption(val, label, iconClass, color) {
+    const input = document.getElementById('sensorZone');
+    const textEl = document.getElementById('zoneSelectedText');
+    const iconEl = document.getElementById('zoneSelectedIcon');
+    if (input) input.value = val;
+    if (textEl) textEl.textContent = label;
+    if (iconEl) {
+        iconEl.className = `w-5 h-5 rounded-lg bg-${color}-50 text-${color}-600 flex items-center justify-center text-[10px] shrink-0 border border-${color}-200`;
+        iconEl.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+    }
+    toggleZoneMenu();
+}
+window.selectZoneOption = selectZoneOption;
 
 async function testCustomDslRule() {
     const ruleInput = document.getElementById('customRuleInput');
@@ -1667,24 +2352,61 @@ async function testCustomDslRule() {
         if (!res.ok) throw new Error('Endpoint offline');
         const result = await res.json();
 
+        const isViolated = result.violated;
+        const statusBadge = isViolated
+            ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200 shadow-2xs">VIOLATION_TRIGGERED</span>'
+            : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">NORMAL_COMPLIANT</span>';
+
         output.innerHTML = `
-            <div><strong>Rule:</strong> ${result.dslRule}</div>
-            <div><strong>Rule Logic Tree:</strong> <span class="text-emerald-700 font-bold">${result.parsedAST || 'N/A'}</span></div>
-            <div><strong>Evaluation:</strong> <span class="${result.violated ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'}">${result.status}</span></div>
-            <div><strong>Result:</strong> ${result.message}</div>
+            <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                <div class="flex items-center space-x-2 min-w-0">
+                    <span class="font-mono text-xs font-bold text-slate-800 shrink-0">CUSTOM-RULE</span>
+                    <code class="text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-mono font-semibold truncate">${escapeHtml(result.dslRule || rule)}</code>
+                </div>
+                ${statusBadge}
+            </div>
+            <div class="text-[11px] font-mono text-slate-600 space-y-1 pt-1">
+                <div>Rule Logic Tree (AST): <span class="text-emerald-700 font-bold">${escapeHtml(result.parsedAST || ('(' + rule + ')'))}</span></div>
+                <div class="${isViolated ? 'text-rose-600 font-bold' : 'text-slate-600'}">${escapeHtml(result.message || (isViolated ? 'Policy conditions MET - Automated municipal action required!' : 'Policy conditions NOT met - Normal operations.'))}</div>
+            </div>
         `;
     } catch (err) {
         console.warn('Evaluating custom DSL rule in client parser fallback:', err);
-        // Simple client parser fallback
-        const noise = sensorPayload.NOISE_LEVEL;
-        const zone = sensorPayload.SENSOR_ZONE;
-        const isViolated = (noise > 80 && zone === 'INDUSTRIAL');
+        
+        let isViolated = false;
+        try {
+            let expr = rule;
+            for (const [k, v] of Object.entries(sensorPayload)) {
+                const regex = new RegExp(`\\b${k}\\b`, 'g');
+                if (typeof v === 'string') {
+                    expr = expr.replace(regex, `"${v.toUpperCase()}"`);
+                } else {
+                    expr = expr.replace(regex, v);
+                }
+            }
+            expr = expr.replace(/\bAND\b/gi, '&&').replace(/\bOR\b/gi, '||');
+            expr = expr.replace(/([^><!=])=([^=])/g, '$1==$2');
+            isViolated = Boolean(Function(`"use strict"; return (${expr})`)());
+        } catch(e) {
+            isViolated = (sensorPayload.NOISE_LEVEL > 80 && sensorPayload.SENSOR_ZONE === 'INDUSTRIAL');
+        }
+
+        const statusBadge = isViolated
+            ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200 shadow-2xs">VIOLATION_TRIGGERED</span>'
+            : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">NORMAL_COMPLIANT</span>';
 
         output.innerHTML = `
-            <div><strong>Rule:</strong> <code>${rule}</code></div>
-            <div><strong>Rule Logic Tree (AST):</strong> <span class="text-emerald-700 font-bold">(${rule})</span></div>
-            <div><strong>Evaluation:</strong> <span class="${isViolated ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'}">${isViolated ? 'VIOLATION_TRIGGERED' : 'NORMAL_COMPLIANT'}</span></div>
-            <div><strong>Result:</strong> ${isViolated ? 'Policy conditions MET - Automated municipal action required!' : 'Policy conditions NOT met - Normal operations.'}</div>
+            <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                <div class="flex items-center space-x-2 min-w-0">
+                    <span class="font-mono text-xs font-bold text-slate-800 shrink-0">CUSTOM-RULE</span>
+                    <code class="text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-mono font-semibold truncate">${escapeHtml(rule)}</code>
+                </div>
+                ${statusBadge}
+            </div>
+            <div class="text-[11px] font-mono text-slate-600 space-y-1 pt-1">
+                <div>Rule Logic Tree (AST): <span class="text-emerald-700 font-bold">(${escapeHtml(rule)})</span></div>
+                <div class="${isViolated ? 'text-rose-600 font-bold' : 'text-slate-600'}">${isViolated ? 'Policy conditions MET - Automated municipal action required!' : 'Policy conditions NOT met - Normal operations.'}</div>
+            </div>
         `;
     }
 }

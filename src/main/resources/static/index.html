@@ -884,52 +884,155 @@
                 </div>
 
                 <!-- Scrollable Body Content -->
-                <div class="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
                         <!-- Complaint Submission Form -->
-                        <div class="bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70 space-y-4">
-                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">File Citizen Incident</h4>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Citizen Full Name</label>
-                                <input type="text" id="cCitizenName" value="Kamal Jayasuriya" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Contact Phone</label>
-                                <input type="text" id="cContact" value="0779988776" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Incident Title / Issue</label>
-                                <input type="text" id="cTitle" value="Main transformer sparking near bus stop" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Street</label>
-                                <input type="text" id="cLocation" value="Duplication Road, Colombo 04" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Incident Severity Level</label>
-                                <select id="cSeverity" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                                    <option value="LOW">LOW (Local Staff Resolution)</option>
-                                    <option value="MEDIUM">MEDIUM (Area Supervisor Escalation)</option>
-                                    <option value="HIGH">HIGH (Chief City Manager Review)</option>
-                                    <option value="CRITICAL" selected>CRITICAL (Emergency Response Unit)</option>
-                                </select>
+                        <div class="bg-[#F8F9FA] p-4 sm:p-5 rounded-2xl border border-slate-200/70 space-y-3 shadow-xs">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-200/80 gap-2">
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Citizen Incident Simulator</h4>
+                                    <p class="text-[11px] text-slate-400 truncate">Ingest & dispatch to responsibility chain</p>
+                                </div>
+                                <span class="whitespace-nowrap shrink-0 px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-xs">
+                                    Chain Head: Tier 1
+                                </span>
                             </div>
 
-                            <button onclick="submitComplaint()" class="w-full bg-amber-400 hover:bg-amber-500 text-neutral-900 font-extrabold py-3 rounded-xl text-xs transition-all duration-200 shadow-md shadow-amber-200/80 flex items-center justify-center gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Citizen Full Name <span class="text-rose-500">*</span></label>
+                                <input type="text" id="cCitizenName" placeholder="e.g. Kamal Jayasuriya" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Contact Phone <span class="text-rose-500">*</span></label>
+                                <input type="text" id="cContact" placeholder="e.g. 0779988776" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Incident Title / Issue <span class="text-rose-500">*</span></label>
+                                <input type="text" id="cTitle" placeholder="e.g. Main transformer sparking near bus stop" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Street <span class="text-rose-500">*</span></label>
+                                <input type="text" id="cLocation" placeholder="e.g. Duplication Road, Colombo 04" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
+                            </div>
+
+                            <!-- Theme-Styled Incident Severity Level Custom Dropdown -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Incident Severity Level <span class="text-rose-500">*</span></label>
+                                <input type="hidden" id="cSeverity" value="">
+                                
+                                <div class="relative" id="customSeverityContainer">
+                                    <button type="button" id="severityTrigger" onclick="toggleSeverityMenu()" class="w-full bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3.5 py-2 text-xs font-semibold text-neutral-800 flex items-center justify-between shadow-xs transition-all focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                        <div class="flex items-center gap-2 truncate">
+                                            <span id="severitySelectedDot" class="w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0"></span>
+                                            <span id="severitySelectedText" class="truncate font-semibold text-slate-400">-- Please Select Incident Severity Level --</span>
+                                        </div>
+                                        <i id="severityChevron" class="fa-solid fa-chevron-down text-[10px] text-slate-400 shrink-0 ml-2 transition-transform duration-200"></i>
+                                    </button>
+
+                                    <!-- Theme Styled Dropdown Options -->
+                                    <div id="severityMenu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1 max-h-60 overflow-y-auto divide-y divide-slate-100 transition-all">
+                                        <!-- LOW -->
+                                        <div onclick="selectSeverityOption('LOW', 'LOW (Local Staff Resolution)', 'bg-emerald-500', 'bg-emerald-50 text-emerald-700 border-emerald-200')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                                <div class="min-w-0">
+                                                    <div class="text-xs font-bold text-slate-800 group-hover:text-amber-900 truncate">LOW (Local Staff Resolution)</div>
+                                                    <div class="text-[10px] text-slate-400">Flickering bulb, small pothole, community staff directly</div>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">Tier 1</span>
+                                        </div>
+                                        <!-- MEDIUM -->
+                                        <div onclick="selectSeverityOption('MEDIUM', 'MEDIUM (Area Supervisor Escalation)', 'bg-amber-500', 'bg-amber-50 text-amber-700 border-amber-200')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
+                                                <div class="min-w-0">
+                                                    <div class="text-xs font-bold text-slate-800 group-hover:text-amber-900 truncate">MEDIUM (Area Supervisor Escalation)</div>
+                                                    <div class="text-[10px] text-slate-400">Water line burst, road blockage, zonal repair budget</div>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">Tier 2</span>
+                                        </div>
+                                        <!-- HIGH -->
+                                        <div onclick="selectSeverityOption('HIGH', 'HIGH (Chief City Manager Review)', 'bg-orange-500', 'bg-orange-50 text-orange-700 border-orange-200')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0"></span>
+                                                <div class="min-w-0">
+                                                    <div class="text-xs font-bold text-slate-800 group-hover:text-amber-900 truncate">HIGH (Chief City Manager Review)</div>
+                                                    <div class="text-[10px] text-slate-400">Transformer breakdown, multi-sector outage, council order</div>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-orange-50 text-orange-700 border border-orange-200 shrink-0">Tier 3</span>
+                                        </div>
+                                        <!-- CRITICAL -->
+                                        <div onclick="selectSeverityOption('CRITICAL', 'CRITICAL (Emergency Response Unit)', 'bg-rose-500', 'bg-rose-50 text-rose-700 border-rose-200')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>
+                                                <div class="min-w-0">
+                                                    <div class="text-xs font-bold text-rose-800 group-hover:text-rose-950 truncate">CRITICAL (Emergency Response Unit)</div>
+                                                    <div class="text-[10px] text-rose-500">Gas leaks, hospital power cut, disaster unit mobilized</div>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">Tier 4</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="submitComplaint()" class="w-full bg-amber-400 hover:bg-amber-500 text-neutral-900 font-extrabold py-2.5 rounded-xl text-xs transition-all duration-200 shadow-md shadow-amber-200/80 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
                                 <i class="fa-solid fa-paper-plane"></i> Submit & Dispatch Incident
                             </button>
                         </div>
 
                         <!-- Complaints Audit Trail & Feed -->
-                        <div class="lg:col-span-2 bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Escalation Audit Trail (Traceability)</h4>
-                                <button onclick="loadComplaints()" class="text-xs text-slate-500 hover:text-amber-600 font-semibold flex items-center gap-1">
-                                    <i class="fa-solid fa-rotate mr-1"></i> Refresh List
-                                </button>
+                        <div class="lg:col-span-2 bg-[#F8F9FA] p-4 sm:p-5 rounded-2xl border border-slate-200/70 flex flex-col justify-between space-y-3 shadow-xs">
+                            <div>
+                                <!-- Header & Refresh -->
+                                <div class="flex flex-wrap items-center justify-between pb-2 border-b border-slate-200/80 mb-2 gap-2">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Escalation Audit Trail (Chain of Responsibility)</h4>
+                                        <p class="text-[11px] text-slate-400">Step-by-step propagation trace through municipal authorities</p>
+                                    </div>
+                                    <button onclick="loadComplaints()" class="text-xs text-slate-500 hover:text-amber-600 font-semibold flex items-center gap-1 transition">
+                                        <i class="fa-solid fa-rotate mr-1 text-slate-400"></i> Refresh List
+                                    </button>
+                                </div>
+
+                                <!-- Live Pipeline Tier Banner -->
+                                <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs mb-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                    <span class="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-link text-amber-500"></i> Responsibility Pipeline:
+                                    </span>
+                                    <div class="flex items-center gap-1 sm:gap-1.5 text-[10px] font-bold">
+                                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Tier 1: Local Staff</span>
+                                        <i class="fa-solid fa-arrow-right text-[8px] text-slate-400"></i>
+                                        <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">Tier 2: Supervisor</span>
+                                        <i class="fa-solid fa-arrow-right text-[8px] text-slate-400"></i>
+                                        <span class="px-2 py-0.5 rounded bg-orange-50 text-orange-700 border border-orange-200">Tier 3: City Manager</span>
+                                        <i class="fa-solid fa-arrow-right text-[8px] text-slate-400"></i>
+                                        <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">Tier 4: Disaster Unit</span>
+                                    </div>
+                                </div>
+
+                                <!-- Role Filter Tabs -->
+                                <div class="flex items-center gap-1.5 mb-2 overflow-x-auto pb-1 text-[11px]">
+                                    <button id="filterTabAll" onclick="filterComplaints('ALL')" class="px-3 py-1 rounded-lg font-bold bg-neutral-900 text-white shadow-xs transition">
+                                        All Incidents <span id="countBadgeAll" class="ml-1 text-[9px] bg-neutral-700 px-1.5 py-0.2 rounded-full">3</span>
+                                    </button>
+                                    <button id="filterTabStaff" onclick="filterComplaints('STAFF')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">
+                                        🟢 Local Staff <span id="countBadgeStaff" class="ml-1 text-[9px] bg-slate-100 px-1.5 py-0.2 rounded-full text-slate-600">1</span>
+                                    </button>
+                                    <button id="filterTabSupervisor" onclick="filterComplaints('SUPERVISOR')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">
+                                        🟡 Area Supervisor <span id="countBadgeSupervisor" class="ml-1 text-[9px] bg-slate-100 px-1.5 py-0.2 rounded-full text-slate-600">1</span>
+                                    </button>
+                                    <button id="filterTabManager" onclick="filterComplaints('MANAGER')" class="px-2.5 py-1 rounded-lg font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">
+                                        🔴 City Manager & Disaster <span id="countBadgeManager" class="ml-1 text-[9px] bg-slate-100 px-1.5 py-0.2 rounded-full text-slate-600">1</span>
+                                    </button>
+                                </div>
                             </div>
                             
-                            <div id="complaintsContainer" class="space-y-3 overflow-y-auto max-h-[500px] pr-2">
+                            <!-- Container with internal scroll, strictly capped -->
+                            <div id="complaintsContainer" class="space-y-2.5 overflow-y-auto max-h-[350px] sm:max-h-[380px] pr-1.5 scrollbar-thin">
                                 <p class="text-xs text-slate-400">Loading complaints log...</p>
                             </div>
                         </div>
@@ -946,209 +1049,341 @@
                 
                 <!-- Fixed Section Header (Always Pinned at Top) -->
                 <div class="shrink-0 px-5 py-3 sm:px-6 sm:py-3.5 border-b border-slate-100 bg-white z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                    <div>
+                    <div class="min-w-0">
                         <div class="flex items-center gap-2.5">
-                            <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-extrabold shadow-sm">
+                            <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-extrabold shadow-sm shrink-0">
                                 <i class="fa-solid fa-lightbulb"></i>
                             </span>
-                            <h3 class="text-xl font-extrabold text-neutral-900">
+                            <h3 class="text-xl font-extrabold text-neutral-900 truncate">
                                 Smart Streetlights Fleet Management
                             </h3>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">
+                        <p class="text-xs text-slate-400 mt-0.5 truncate">
                             High-Density Municipal Lighting • <span class="text-emerald-700 font-bold">Optimized Fleet Engine</span> • Centralized luminaire asset specifications powering 50,000+ smart streetlight nodes with 95%+ RAM preservation.
                         </p>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <i class="fa-solid fa-microchip text-[10px] mr-1"></i> High-Density Fleet Engine
+                    <span class="whitespace-nowrap shrink-0 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-microchip text-[10px]"></i> High-Density Fleet Engine
                     </span>
                 </div>
 
                 <!-- Scrollable Body Content -->
-                <div class="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4">
-                    <!-- Main Grid: Left Street Network Map, Right RAM Profiler (Exact Match to Screenshot 4) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3">
+                    <!-- Main Grid: Left Street Network Map, Right RAM Profiler -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
                     
-                    <!-- Left 2/3: Street Network & Lighting Grid Canvas View -->
-                    <div class="lg:col-span-2 bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70 space-y-4">
+                    <!-- Left 2/3: Street Network & Lighting Grid Canvas View (Aligned with Smart Zone Municipal Corridors) -->
+                    <div class="lg:col-span-2 bg-[#F8F9FA] p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 space-y-3 flex flex-col justify-between shadow-xs">
                         
-                        <!-- Header with Title, Filter Tabs, and Power Controls -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <!-- Header with Title, Dimming Controls and Corridor Badges -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-200/80 gap-2">
                             <div>
-                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Municipal Street Network & Lighting Grid</h4>
-                                <p class="text-[11px] text-slate-400">50,000 nodes mapped along city corridors • Interactive Fleet Controller</p>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Municipal Street Network & Lighting Grid</h4>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-xs">SMART ZONES MAPPED</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400">Streetlight fleet mapped along Galle Rd, Duplication Rd, Lotus Rd, Regent St corridors</p>
                             </div>
                             
                             <!-- Dimming Preset Quick Buttons & Toggle -->
-                            <div class="flex items-center space-x-2">
-                                <div class="flex items-center bg-white border border-slate-200 rounded-xl p-1 text-[11px] font-bold shadow-sm">
-                                    <button onclick="setFleetDimming(100)" id="dim-100" class="px-2.5 py-1 rounded-lg bg-neutral-900 text-white transition">100%</button>
-                                    <button onclick="setFleetDimming(50)" id="dim-50" class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-neutral-900 transition">50%</button>
-                                    <button onclick="setFleetDimming(0)" id="dim-0" class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-neutral-900 transition">Off</button>
+                            <div class="flex items-center space-x-2 shrink-0">
+                                <div class="flex items-center bg-white border border-slate-200 rounded-xl p-0.5 text-[11px] font-bold shadow-xs">
+                                    <button onclick="setFleetDimming(100)" id="dim-100" class="px-2 py-1 rounded-lg bg-neutral-900 text-white transition text-[10px]">100%</button>
+                                    <button onclick="setFleetDimming(50)" id="dim-50" class="px-2 py-1 rounded-lg text-slate-500 hover:text-neutral-900 transition text-[10px]">50%</button>
+                                    <button onclick="setFleetDimming(0)" id="dim-0" class="px-2 py-1 rounded-lg text-slate-500 hover:text-neutral-900 transition text-[10px]">Off</button>
                                 </div>
-                                <button onclick="toggleAllLights()" class="bg-neutral-900 hover:bg-neutral-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-sm flex items-center gap-1.5">
-                                    <i class="fa-solid fa-power-off"></i> Toggle State
+                                <button onclick="toggleAllLights()" class="bg-neutral-900 hover:bg-neutral-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95">
+                                    <i class="fa-solid fa-power-off"></i> Toggle
                                 </button>
                             </div>
                         </div>
 
                         <!-- Interactive Filter Pills & Corridor Badges -->
                         <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-                            <div class="flex flex-wrap items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-                                <button onclick="filterLuminaire('ALL')" id="filter-all" class="px-3 py-1 rounded-lg font-bold text-[11px] bg-amber-100 text-amber-900 transition">
-                                    All Types (50k)
+                            <div class="flex flex-wrap items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
+                                <button onclick="filterLuminaire('ALL')" id="filter-all" class="px-2.5 py-1 rounded-lg font-bold text-[11px] bg-amber-100 text-amber-900 transition">
+                                    All Types (<span id="filterAllCount">50k</span>)
                                 </button>
-                                <button onclick="filterLuminaire('WARM')" id="filter-warm" class="px-3 py-1 rounded-lg font-semibold text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span> 90W Warm (Downtown)
+                                <button onclick="filterLuminaire('WARM')" id="filter-warm" class="px-2.5 py-1 rounded-lg font-semibold text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span> 90W Warm (Commercial)
                                 </button>
-                                <button onclick="filterLuminaire('HIGH')" id="filter-high" class="px-3 py-1 rounded-lg font-semibold text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+                                <button onclick="filterLuminaire('HIGH')" id="filter-high" class="px-2.5 py-1 rounded-lg font-semibold text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full bg-sky-400"></span> 150W High-Mast (Highway)
                                 </button>
-                                <button onclick="filterLuminaire('SOLAR')" id="filter-solar" class="px-3 py-1 rounded-lg font-semibold text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+                                <button onclick="filterLuminaire('SOLAR')" id="filter-solar" class="px-2.5 py-1 rounded-lg font-semibold text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 60W Solar (Parkway)
                                 </button>
                             </div>
 
-                            <span class="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-bold flex items-center gap-1.5">
+                            <span class="text-[10.5px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-bold flex items-center gap-1.5 shadow-xs shrink-0">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> GPS Mesh Synced
                             </span>
                         </div>
 
-                        <!-- Visual City Blueprint / Road Network Canvas -->
-                        <div class="relative bg-[#0A0F1D] rounded-2xl p-5 overflow-hidden border border-slate-800 shadow-2xl min-h-[340px] flex flex-col justify-between select-none">
+                        <!-- Visual City Blueprint / Road Network Canvas (Municipal GIS Map - Dark Contrast Blueprint) -->
+                        <div class="relative bg-[#0F172A] rounded-2xl overflow-hidden border border-slate-700/80 shadow-md min-h-[350px] flex flex-col justify-between select-none">
                             
-                            <!-- Ambient Radar Sweep Line -->
-                            <div class="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(to_bottom,transparent_0%,rgba(56,189,248,0.15)_50%,transparent_100%)] animate-[pulse_4s_ease-in-out_infinite]"></div>
-
-                            <!-- City Districts / Blocks Background Grid -->
-                            <div class="absolute inset-0 p-5 grid grid-cols-3 grid-rows-2 gap-4 pointer-events-none">
-                                <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-2.5 flex flex-col justify-between">
-                                    <span class="text-[9px] font-mono font-bold text-slate-500 tracking-wider">ZONE A • DOWNTOWN CORE</span>
-                                    <span class="text-[8px] font-mono text-slate-600">24,120 NODES</span>
-                                </div>
-                                <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-2.5 flex flex-col justify-between">
-                                    <span class="text-[9px] font-mono font-bold text-slate-500 tracking-wider">ZONE B • CIVIC SQUARE</span>
-                                    <span class="text-[8px] font-mono text-slate-600">CENTRAL HUB</span>
-                                </div>
-                                <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-2.5 flex flex-col justify-between">
-                                    <span class="text-[9px] font-mono font-bold text-slate-500 tracking-wider">ZONE C • TECH CORRIDOR</span>
-                                    <span class="text-[8px] font-mono text-slate-600">INNOVATION HUB</span>
-                                </div>
-                                <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-2.5 flex flex-col justify-between">
-                                    <span class="text-[9px] font-mono font-bold text-slate-500 tracking-wider">ZONE D • HARBOR TERMINAL</span>
-                                    <span class="text-[8px] font-mono text-slate-600">COASTAL ARTERIAL</span>
-                                </div>
-                                <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-2.5 flex flex-col justify-between">
-                                    <span class="text-[9px] font-mono font-bold text-slate-500 tracking-wider">ZONE E • HIGHWAY 101 JUNCTION</span>
-                                    <span class="text-[8px] font-mono text-slate-600">16,400 HIGH-MAST</span>
-                                </div>
-                                <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-2.5 flex flex-col justify-between">
-                                    <span class="text-[9px] font-mono font-bold text-slate-500 tracking-wider">ZONE F • ECO PARKWAY</span>
-                                    <span class="text-[8px] font-mono text-slate-600">9,480 SOLAR NODES</span>
-                                </div>
-                            </div>
-
-                            <!-- Roadways Overlay with Lane Markings -->
-                            <div class="absolute inset-0 pointer-events-none">
-                                <!-- Horizontal Main Arterial (Highway 101) -->
-                                <div class="absolute top-1/2 left-0 right-0 h-9 -translate-y-1/2 bg-slate-950/80 border-y border-dashed border-sky-500/30 flex items-center justify-center">
-                                    <span class="text-[9px] font-mono font-bold text-sky-400/40 tracking-widest uppercase">HIGHWAY 101 EXPRESSWAY (EAST-WEST)</span>
-                                </div>
-                                <!-- Vertical Boulevard (Silicon Ave) -->
-                                <div class="absolute left-1/3 top-0 bottom-0 w-8 -translate-x-1/2 bg-slate-950/80 border-x border-dashed border-amber-500/30"></div>
-                                <!-- Vertical Boulevard 2 (Parkway Drive) -->
-                                <div class="absolute left-2/3 top-0 bottom-0 w-8 -translate-x-1/2 bg-slate-950/80 border-x border-dashed border-emerald-500/30"></div>
-                            </div>
-
-                            <!-- Interactive Streetlight Node Points along Roadways -->
-                            <div id="lightNodesContainer" class="relative z-10 grid grid-cols-6 grid-rows-3 gap-y-14 gap-x-8 p-3 my-auto">
-                                <!-- Dynamically populated by app.js with interactive light nodes -->
-                            </div>
-
-                            <!-- Interactive Node Live Inspector Card (Bottom Floating Overlay) -->
-                            <div class="relative z-20 bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-lg">
-                                <div class="flex items-center space-x-3">
-                                    <div id="inspectorIcon" class="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-400/40 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
-                                        <i class="fa-solid fa-lightbulb"></i>
-                                    </div>
-                                    <div>
-                                        <div class="flex items-center space-x-2">
-                                            <span id="inspectorNodeId" class="font-mono text-xs font-bold text-white">Selected Node: #SL-COL-1021</span>
-                                            <span id="inspectorBadge" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">90W Warm LED</span>
+                            <!-- City Districts / Municipal Zoning Background Blocks (Directly Aligned with Part B Smart Zone Hierarchy) -->
+                            <div class="absolute inset-0 p-3 grid grid-cols-3 grid-rows-2 gap-3 pointer-events-none">
+                                <!-- Zone 1: Commercial District - Galle Road (BOC HQ & Cinnamon Grand) -->
+                                <div class="bg-amber-950/25 rounded-xl border border-amber-500/25 p-2.5 relative overflow-hidden">
+                                    <div class="max-w-[55%] leading-tight">
+                                        <div class="flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+                                            <span class="text-[7.5px] font-mono font-bold text-amber-400 uppercase tracking-wide">Commercial Dist.</span>
                                         </div>
-                                        <p id="inspectorDetails" class="text-[10px] text-slate-400 font-mono mt-0.5">Hardware: Philips Lumileds • Shared Singleton Pool • Extrinsic: Lat 6.9271, Lon 79.8612</p>
+                                        <div class="text-[9px] font-mono font-black text-amber-200 mt-0.5">GALLE ROAD</div>
+                                        <div class="text-[7px] font-mono text-amber-300/80 mt-0.5">BOC HQ • Cinnamon Grand</div>
                                     </div>
                                 </div>
-                                <div class="flex items-center space-x-3 text-right">
-                                    <div>
-                                        <span class="text-[9px] text-slate-400 block font-mono">LUMEN OUTPUT</span>
-                                        <span id="inspectorLumens" class="text-xs font-mono font-bold text-emerald-400">100% (Peak Lumens)</span>
+
+                                <!-- Zone 2: Commercial District - Lotus Road (World Trade Center) -->
+                                <div class="bg-sky-950/25 rounded-xl border border-sky-500/25 p-2.5 relative overflow-hidden flex justify-end">
+                                    <div class="max-w-[55%] text-right leading-tight">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <span class="text-[7.5px] font-mono font-bold text-sky-400 uppercase tracking-wide">Commercial Dist.</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0"></span>
+                                        </div>
+                                        <div class="text-[9px] font-mono font-black text-sky-200 mt-0.5">LOTUS ROAD</div>
+                                        <div class="text-[7px] font-mono text-sky-300/80 mt-0.5">World Trade Center (WTC)</div>
                                     </div>
-                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34D399] animate-pulse"></span>
                                 </div>
+
+                                <!-- Zone 3: Tech Innovation District - Duplication Road (Virtusa & Dialog) -->
+                                <div class="bg-indigo-950/25 rounded-xl border border-indigo-500/25 p-2.5 relative overflow-hidden flex justify-end">
+                                    <div class="max-w-[55%] text-right leading-tight">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <span class="text-[7.5px] font-mono font-bold text-indigo-400 uppercase tracking-wide">Tech Innovation</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span>
+                                        </div>
+                                        <div class="text-[9px] font-mono font-black text-indigo-200 mt-0.5">DUPLICATION RD</div>
+                                        <div class="text-[7px] font-mono text-indigo-300/80 mt-0.5">Virtusa Campus • Dialog</div>
+                                    </div>
+                                </div>
+
+                                <!-- Zone 4: Tech Innovation District - Regent Street (National Hospital) -->
+                                <div class="bg-rose-950/25 rounded-xl border border-rose-500/25 p-2.5 relative overflow-hidden flex items-center">
+                                    <div class="max-w-[55%] leading-tight">
+                                        <div class="flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
+                                            <span class="text-[7.5px] font-mono font-bold text-rose-400 uppercase tracking-wide">Tech Innovation</span>
+                                        </div>
+                                        <div class="text-[9px] font-mono font-black text-rose-200 mt-0.5">REGENT STREET</div>
+                                        <div class="text-[7px] font-mono text-rose-300/80 mt-0.5">National Hospital Smart Wing</div>
+                                    </div>
+                                </div>
+
+                                <!-- Zone 5: Municipal Arterial - Highway 101 Expressway Interchange -->
+                                <div class="bg-slate-800/40 rounded-xl border border-slate-700/60 p-2.5 relative overflow-hidden flex items-center justify-end">
+                                    <div class="max-w-[55%] text-right leading-tight">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <span class="text-[7.5px] font-mono font-bold text-slate-400 uppercase tracking-wide">Municipal Arterial</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
+                                        </div>
+                                        <div class="text-[9px] font-mono font-black text-slate-200 mt-0.5">HIGHWAY INTERCHANGE</div>
+                                        <div class="text-[7px] font-mono text-slate-400/90 mt-0.5">High-Mast Crossing (150W)</div>
+                                    </div>
+                                </div>
+
+                                <!-- Zone 6: Municipal Coastal Strip - Marine Drive Eco Parkway -->
+                                <div class="bg-emerald-950/25 rounded-xl border border-emerald-500/25 p-2.5 relative overflow-hidden flex items-center justify-end">
+                                    <div class="max-w-[55%] text-right leading-tight">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <span class="text-[7.5px] font-mono font-bold text-emerald-400 uppercase tracking-wide">Municipal Coastal</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                                        </div>
+                                        <div class="text-[9px] font-mono font-black text-emerald-200 mt-0.5">MARINE DRIVE</div>
+                                        <div class="text-[7px] font-mono text-emerald-300/80 mt-0.5">Coastal Eco Strip (60W Solar)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Roadways Overlay with Realistic Asphalt, Lane Markings & Signage -->
+                            <div class="absolute inset-0 pointer-events-none">
+                                <!-- Horizontal Expressway (Highway 101) -->
+                                <div class="absolute top-1/2 left-0 right-0 h-9 -translate-y-1/2 bg-slate-800/95 border-y-2 border-slate-700 shadow-inner flex items-center justify-between px-4">
+                                    <div class="w-full border-t border-dashed border-amber-400/70 flex items-center justify-center">
+                                        <span class="bg-slate-900/90 text-amber-300 px-2 py-0.5 rounded text-[8px] font-mono font-bold tracking-widest uppercase shadow-xs border border-amber-500/30">
+                                            HIGHWAY 101 EXPRESSWAY (EAST-WEST)
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- Vertical Road 1: Galle Road Corridor -->
+                                <div class="absolute left-[20%] top-0 bottom-0 w-8 -translate-x-1/2 bg-slate-800/95 border-x-2 border-slate-700 shadow-inner flex items-center justify-center">
+                                    <div class="h-full border-l border-dashed border-slate-400/50 flex items-center justify-center">
+                                        <span class="text-[7.5px] font-mono font-bold text-slate-300 -rotate-90 uppercase tracking-widest whitespace-nowrap">
+                                            GALLE ROAD
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- Vertical Road 2: Lotus Road Arterial -->
+                                <div class="absolute left-[47%] top-0 bottom-0 w-8 -translate-x-1/2 bg-slate-800/95 border-x-2 border-slate-700 shadow-inner flex items-center justify-center">
+                                    <div class="h-full border-l border-dashed border-slate-400/50 flex items-center justify-center">
+                                        <span class="text-[7.5px] font-mono font-bold text-slate-300 -rotate-90 uppercase tracking-widest whitespace-nowrap">
+                                            LOTUS ROAD
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- Vertical Road 3: Duplication Road Boulevard -->
+                                <div class="absolute left-[78%] top-0 bottom-0 w-8 -translate-x-1/2 bg-slate-800/95 border-x-2 border-slate-700 shadow-inner flex items-center justify-center">
+                                    <div class="h-full border-l border-dashed border-slate-400/50 flex items-center justify-center">
+                                        <span class="text-[7.5px] font-mono font-bold text-slate-300 -rotate-90 uppercase tracking-widest whitespace-nowrap">
+                                            DUPLICATION RD
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- Bottom Coastal Road: Marine Drive Parkway -->
+                                <div class="absolute bottom-1.5 left-0 right-0 h-6 bg-slate-800/95 border-t border-emerald-500/50 flex items-center justify-center">
+                                    <span class="text-[7px] font-mono font-bold text-emerald-300 uppercase tracking-widest">
+                                        MARINE DRIVE COASTAL PARKWAY (60W SOLAR LED ARTERIAL)
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Streetlight Node Points Layer -->
+                            <div id="lightNodesContainer" class="absolute inset-0 z-10 pointer-events-auto">
+                                <!-- Populated dynamically by app.js with 42 realistic streetlights placed along roads -->
+                            </div>
+                        </div>
+
+                        <!-- Dedicated Node Inspector Card (Positioned BELOW Map - 100% Map Viewport Unobstructed) -->
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-slate-800">
+                            <div class="flex items-center space-x-3 min-w-0">
+                                <div id="inspectorIcon" class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold border border-amber-300 shadow-xs shrink-0">
+                                    <i class="fa-solid fa-lightbulb"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center flex-wrap gap-2">
+                                        <span id="inspectorNodeId" class="font-mono text-xs font-bold text-slate-900 truncate">Selected Node: #SL-COL-1001</span>
+                                        <span id="inspectorBadge" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0">90W Warm LED</span>
+                                        <span class="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Shared Flyweight #1</span>
+                                    </div>
+                                    <p id="inspectorDetails" class="text-[10px] text-slate-500 font-mono mt-0.5 truncate">
+                                        Hardware: Philips Lumileds (3000K, 9500 lm) • Extrinsic: Lat 6.9271, Lon 79.8612
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3 text-right shrink-0">
+                                <div>
+                                    <span class="text-[8.5px] text-slate-400 block font-mono uppercase font-bold tracking-wider">LUMEN OUTPUT</span>
+                                    <span id="inspectorLumens" class="text-xs font-mono font-bold text-emerald-700">100% (Peak Lumens)</span>
+                                </div>
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs animate-pulse"></span>
                             </div>
                         </div>
 
                         <!-- Bottom Status Bar -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2 pt-1">
-                            <span class="flex items-center gap-1.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2 pt-1 border-t border-slate-200/80">
+                            <span class="flex items-center gap-1.5 text-[11px]">
                                 <i class="fa-solid fa-satellite-dish text-emerald-500"></i>
                                 <span>Mesh Latency: <strong class="text-slate-700">12ms</strong> • Coordinates: <strong class="text-slate-700">Extrinsic State Only</strong></span>
                             </span>
-                            <span class="font-bold text-emerald-600 flex items-center gap-1.5">
+                            <span class="font-bold text-emerald-600 flex items-center gap-1.5 text-[11px]">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                 <span id="fleetStatusText">Fleet Status: 50,000 Nodes Operational (100% Lumens)</span>
                             </span>
                         </div>
                     </div>
 
-                    <!-- Right 1/3: Memory RAM Profiler (Exact Match to Screenshot 4) -->
-                    <div class="bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70 space-y-4 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Memory RAM Profiler</h4>
-                            <p class="text-[11px] text-slate-400">JVM Heap Footprint Evaluation</p>
+                    <!-- Right 1/3: Memory RAM Profiler (Flyweight JVM Heap Benchmark) -->
+                    <div class="bg-[#F8F9FA] p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 space-y-3 flex flex-col justify-between shadow-xs">
+                        <div class="space-y-3">
+                            <div class="pb-2 border-b border-slate-200/80">
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Memory RAM Profiler</h4>
+                                <p class="text-[11px] text-slate-400">Flyweight Pattern JVM Heap Footprint Benchmark</p>
+                            </div>
 
-                            <div class="mt-3 space-y-3">
+                            <div class="space-y-2.5">
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">Simulated Fleet Scale:</label>
-                                    <select id="streetScaleSelect" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:outline-none">
-                                        <option value="50000" selected>50,000 Streetlights (Full Municipal Grid)</option>
-                                        <option value="25000">25,000 Streetlights (Suburban Grid)</option>
-                                        <option value="10000">10,000 Streetlights (Initial Core)</option>
-                                    </select>
+                                    <input type="hidden" id="streetScaleSelect" value="50000">
+                                    
+                                    <!-- Theme Styled Scale Dropdown -->
+                                    <div class="relative" id="customScaleContainer">
+                                        <button type="button" id="scaleTrigger" onclick="toggleScaleMenu()" class="w-full bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 flex items-center justify-between shadow-xs transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                                            <div class="flex items-center gap-2 truncate">
+                                                <i class="fa-solid fa-lightbulb text-amber-500 text-[11px] shrink-0"></i>
+                                                <span id="scaleSelectedText" class="truncate font-bold text-slate-800">50,000 Streetlights (Full Municipal Grid)</span>
+                                            </div>
+                                            <i id="scaleChevron" class="fa-solid fa-chevron-down text-[10px] text-slate-400 shrink-0 ml-1.5 transition-transform duration-200"></i>
+                                        </button>
+
+                                        <!-- Themed Dropdown Options -->
+                                        <div id="scaleMenu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1 divide-y divide-slate-100 transition-all">
+                                            <div onclick="selectScaleOption('50000', '50,000 Streetlights (Full Municipal Grid)')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                                <div class="flex items-center gap-2.5 min-w-0">
+                                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                                    <div class="min-w-0">
+                                                        <div class="text-xs font-bold text-slate-800 group-hover:text-amber-900 truncate">50,000 Streetlights</div>
+                                                        <div class="text-[10px] text-slate-400">Full Colombo Municipal Grid</div>
+                                                    </div>
+                                                </div>
+                                                <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">100% Fleet</span>
+                                            </div>
+                                            <div onclick="selectScaleOption('25000', '25,000 Streetlights (Suburban Grid)')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                                <div class="flex items-center gap-2.5 min-w-0">
+                                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
+                                                    <div class="min-w-0">
+                                                        <div class="text-xs font-bold text-slate-800 group-hover:text-amber-900 truncate">25,000 Streetlights</div>
+                                                        <div class="text-[10px] text-slate-400">Commercial hubs & arterial highways</div>
+                                                    </div>
+                                                </div>
+                                                <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">50% Fleet</span>
+                                            </div>
+                                            <div onclick="selectScaleOption('10000', '10,000 Streetlights (Initial Core)')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                                <div class="flex items-center gap-2.5 min-w-0">
+                                                    <span class="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0"></span>
+                                                    <div class="min-w-0">
+                                                        <div class="text-xs font-bold text-slate-800 group-hover:text-amber-900 truncate">10,000 Streetlights</div>
+                                                        <div class="text-[10px] text-slate-400">Downtown district center core</div>
+                                                    </div>
+                                                </div>
+                                                <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-sky-50 text-sky-700 border border-sky-200 shrink-0">20% Fleet</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <button onclick="runRamProfile()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2">
+                                <button id="btnSpawnFleet" onclick="runRamProfile(true)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95">
                                     <i class="fa-solid fa-microchip"></i> Spawn & Profile Fleet
                                 </button>
+
+                                <!-- Live Benchmark Toast / Status -->
+                                <div id="profilerFeedback" class="hidden text-[10.5px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-xl flex items-center justify-between shadow-xs transition-all">
+                                    <span class="flex items-center gap-1.5 truncate">
+                                        <i class="fa-solid fa-circle-check text-emerald-600 shrink-0"></i>
+                                        <span id="profilerFeedbackMsg" class="truncate font-semibold">Fleet spawned & profiled successfully!</span>
+                                    </span>
+                                    <span class="text-[9px] text-emerald-700 font-bold shrink-0 ml-1">JVM HEAP OK</span>
+                                </div>
                             </div>
 
                             <!-- Two Comparison Heap Cards -->
-                            <div class="grid grid-cols-2 gap-3 mt-4">
-                                <div class="bg-rose-50 border border-rose-200 p-3 rounded-xl text-center">
-                                    <span class="text-[10px] font-bold text-rose-700 uppercase tracking-wider block">Baseline Unpooled Heap</span>
-                                    <span id="unoptimizedHeapText" class="text-xl font-extrabold text-rose-800 mt-1 block">43.9 MB</span>
-                                    <span class="text-[9px] text-rose-600 block mt-0.5">50,000 unpooled instances</span>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <div class="bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-center shadow-xs">
+                                    <span class="text-[9.5px] font-bold text-rose-700 uppercase tracking-wider block">Baseline Unpooled</span>
+                                    <span id="unoptimizedHeapText" class="text-lg font-black text-rose-800 mt-0.5 block">43.9 MB</span>
+                                    <span id="unoptimizedSubText" class="text-[9px] text-rose-600 block mt-0.5">50,000 unpooled instances</span>
                                 </div>
 
-                                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-center">
-                                    <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Optimized Fleet Heap</span>
-                                    <span id="flyweightHeapText" class="text-xl font-extrabold text-emerald-800 mt-1 block">1.81 MB</span>
-                                    <span class="text-[9px] text-emerald-600 block mt-0.5">3 Shared profiles + coordinate refs</span>
+                                <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl text-center shadow-xs">
+                                    <span class="text-[9.5px] font-bold text-emerald-700 uppercase tracking-wider block">Optimized Fleet</span>
+                                    <span id="flyweightHeapText" class="text-lg font-black text-emerald-800 mt-0.5 block">1.81 MB</span>
+                                    <span id="flyweightSubText" class="text-[9px] text-emerald-600 block mt-0.5">3 Shared profiles + refs</span>
                                 </div>
                             </div>
 
                             <!-- Big Green Preserved RAM Banner -->
-                            <div class="mt-3 bg-emerald-100/70 border border-emerald-300 p-3.5 rounded-xl text-center">
+                            <div class="bg-emerald-100/70 border border-emerald-300 p-3 rounded-xl text-center shadow-xs">
                                 <span class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Preserved JVM Heap Memory</span>
                                 <span id="preservedPercentText" class="text-2xl font-black text-emerald-900 mt-0.5 block">95.9%</span>
                                 <span id="savedMegabytesText" class="text-[11px] font-bold text-emerald-700 block mt-0.5">42.1 MB RAM saved across municipal grid</span>
                             </div>
                         </div>
 
-                        <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500 font-mono">
-                            <span>Shared Asset Profiles: <strong>3 Luminaire Types</strong></span>
-                            <span>Node Telemetry Footprint: <strong>38 Bytes / Node</strong></span>
+                        <div class="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[10.5px] text-slate-500 font-mono">
+                            <span>Shared Pool: <strong class="text-slate-800">3 Luminaire Types</strong></span>
+                            <span>Node Overhead: <strong class="text-slate-800">38 Bytes / Node</strong></span>
                         </div>
                     </div>
                 </div>
@@ -1184,7 +1419,7 @@
                                     <td class="p-3 font-bold text-slate-800">90W LED • 3000K Warm • 9,500 Lumens</td>
                                     <td class="p-3">Philips Lumileds Co.</td>
                                     <td class="p-3">Downtown Ave & Commercial Hub</td>
-                                    <td class="p-3 font-mono font-bold">24,120 Streetlights</td>
+                                    <td id="tableWarmCount" class="p-3 font-mono font-bold">24,120 Streetlights</td>
                                     <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">1 Instance</span></td>
                                     <td class="p-3 font-bold text-emerald-600">95.9% Preserved</td>
                                 </tr>
@@ -1193,7 +1428,7 @@
                                     <td class="p-3 font-bold text-slate-800">150W LED • 5000K Daylight • 16,000 Lumens</td>
                                     <td class="p-3">Osram Streetlight GmbH</td>
                                     <td class="p-3">Highway 101 Expressway</td>
-                                    <td class="p-3 font-mono font-bold">16,400 Streetlights</td>
+                                    <td id="tableHighCount" class="p-3 font-mono font-bold">16,400 Streetlights</td>
                                     <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">1 Instance</span></td>
                                     <td class="p-3 font-bold text-emerald-600">95.9% Preserved</td>
                                 </tr>
@@ -1202,7 +1437,7 @@
                                     <td class="p-3 font-bold text-slate-800">60W LED • 4000K Neutral • 6,200 Lumens</td>
                                     <td class="p-3">Cree Lighting USA</td>
                                     <td class="p-3">Parkway & Residential Zones</td>
-                                    <td class="p-3 font-mono font-bold">9,480 Streetlights</td>
+                                    <td id="tableSolarCount" class="p-3 font-mono font-bold">9,480 Streetlights</td>
                                     <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">1 Instance</span></td>
                                     <td class="p-3 font-bold text-emerald-600">95.9% Preserved</td>
                                 </tr>
@@ -1222,91 +1457,217 @@
                 
                 <!-- Fixed Section Header (Always Pinned at Top) -->
                 <div class="shrink-0 px-5 py-3 sm:px-6 sm:py-3.5 border-b border-slate-100 bg-white z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                    <div>
+                    <div class="min-w-0">
                         <div class="flex items-center gap-2.5">
-                            <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-extrabold shadow-sm">
+                            <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-extrabold shadow-sm shrink-0">
                                 <i class="fa-solid fa-scale-balanced"></i>
                             </span>
-                            <h3 class="text-xl font-extrabold text-neutral-900">
+                            <h3 class="text-xl font-extrabold text-neutral-900 truncate">
                                 Interpreting City Policies Defined in DSL
                             </h3>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">
+                        <p class="text-xs text-slate-400 mt-0.5 truncate">
                             Municipal Regulatory Compliance • <span class="text-emerald-700 font-bold">Automated Rule Engine</span> • Real-time parsing and validation of environmental limits, noise ordinances, and traffic regulations
                         </p>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <i class="fa-solid fa-gavel text-[10px] mr-1"></i> Autonomous Policy Engine
+                    <span class="whitespace-nowrap shrink-0 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-gavel text-[10px]"></i> Autonomous Policy Engine
                     </span>
                 </div>
 
                 <!-- Scrollable Body Content -->
-                <div class="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
                     <!-- Sensor Inputs to Trigger Policies -->
-                    <div class="bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70 space-y-3.5">
-                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">IoT Sensor Telemetry Inputs</h4>
+                    <div class="bg-[#F8F9FA] p-4 sm:p-5 rounded-2xl border border-slate-200/70 space-y-3 shadow-xs">
+                        <div class="pb-2 border-b border-slate-200/80 flex items-center justify-between">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">IoT Sensor Telemetry Inputs</h4>
+                                <p class="text-[11px] text-slate-400">Live environmental & municipal feeds</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-xs shrink-0">
+                                Live Feeds
+                            </span>
+                        </div>
                         
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Noise Sensor (dB)</label>
-                            <input type="number" id="sensorNoise" value="82.5" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                            <span class="text-[10px] text-slate-400 mt-0.5 block">Night limit: 75 dB</span>
+                            <input type="number" id="sensorNoise" value="82.5" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
+                            <span class="text-[10px] text-slate-400 mt-0.5 block">Night limit threshold: 75 dB</span>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Current Hour (0 - 23)</label>
-                            <input type="number" id="sensorHour" value="23" min="0" max="23" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
+                            <input type="number" id="sensorHour" value="23" min="0" max="23" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Parking Duration (Minutes)</label>
-                            <input type="number" id="sensorParking" value="150" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                            <span class="text-[10px] text-slate-400 mt-0.5 block">Limit: 120 mins</span>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Vehicle Classification</label>
-                            <select id="sensorVehicle" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                                <option value="COMMERCIAL" selected>COMMERCIAL</option>
-                                <option value="RESIDENTIAL">RESIDENTIAL</option>
-                                <option value="EMERGENCY">EMERGENCY</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Air Quality Index (AQI)</label>
-                            <input type="number" id="sensorAqi" value="165.0" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Sensor Environment Zone</label>
-                            <select id="sensorZone" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                                <option value="INDUSTRIAL" selected>INDUSTRIAL</option>
-                                <option value="COMMERCIAL">COMMERCIAL</option>
-                                <option value="RESIDENTIAL">RESIDENTIAL</option>
-                            </select>
+                            <input type="number" id="sensorParking" value="150" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
+                            <span class="text-[10px] text-slate-400 mt-0.5 block">Standard maximum limit: 120 mins</span>
                         </div>
 
-                        <button onclick="evaluateTelemetry()" class="w-full bg-amber-400 hover:bg-amber-500 text-neutral-900 font-extrabold py-2.5 rounded-xl text-xs transition shadow-md shadow-amber-200/80 flex items-center justify-center gap-2">
+                        <!-- Theme Styled Vehicle Classification Dropdown -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Vehicle Classification</label>
+                            <input type="hidden" id="sensorVehicle" value="COMMERCIAL">
+                            
+                            <div class="relative" id="customVehicleContainer">
+                                <button type="button" id="vehicleTrigger" onclick="toggleVehicleMenu()" class="w-full bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 flex items-center justify-between shadow-xs transition-all focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                    <div class="flex items-center gap-2 truncate">
+                                        <span id="vehicleSelectedIcon" class="w-5 h-5 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-[10px] shrink-0 border border-amber-200">
+                                            <i class="fa-solid fa-truck"></i>
+                                        </span>
+                                        <span id="vehicleSelectedText" class="truncate font-bold text-slate-800">COMMERCIAL</span>
+                                    </div>
+                                    <i id="vehicleChevron" class="fa-solid fa-chevron-down text-[10px] text-slate-400 shrink-0 ml-1.5 transition-transform duration-200"></i>
+                                </button>
+
+                                <div id="vehicleMenu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1 divide-y divide-slate-100 transition-all">
+                                    <div onclick="selectVehicleOption('COMMERCIAL', 'COMMERCIAL', 'fa-truck', 'amber')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 border border-amber-200">
+                                                <i class="fa-solid fa-truck"></i>
+                                            </span>
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-slate-800 group-hover:text-amber-900 truncate">COMMERCIAL</div>
+                                                <div class="text-[10px] text-slate-400">Freight, logistics, delivery trucks</div>
+                                            </div>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">Regulated</span>
+                                    </div>
+                                    <div onclick="selectVehicleOption('RESIDENTIAL', 'RESIDENTIAL', 'fa-car', 'sky')" class="px-3.5 py-2 hover:bg-sky-50/80 cursor-pointer flex items-center justify-between group transition">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <span class="w-6 h-6 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs shrink-0 border border-sky-200">
+                                                <i class="fa-solid fa-car"></i>
+                                            </span>
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-slate-800 group-hover:text-sky-900 truncate">RESIDENTIAL</div>
+                                                <div class="text-[10px] text-slate-400">Private citizen cars, bikes & EVs</div>
+                                            </div>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-sky-50 text-sky-700 border border-sky-200 shrink-0">Standard</span>
+                                    </div>
+                                    <div onclick="selectVehicleOption('EMERGENCY', 'EMERGENCY', 'fa-truck-medical', 'rose')" class="px-3.5 py-2 hover:bg-rose-50/80 cursor-pointer flex items-center justify-between group transition">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <span class="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs shrink-0 border border-rose-200">
+                                                <i class="fa-solid fa-truck-medical"></i>
+                                            </span>
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-slate-800 group-hover:text-rose-900 truncate">EMERGENCY</div>
+                                                <div class="text-[10px] text-slate-400">Ambulances, fire trucks, police</div>
+                                            </div>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">Exempt</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Air Quality Index (AQI)</label>
+                            <input type="number" id="sensorAqi" value="165.0" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
+                        </div>
+
+                        <!-- Theme Styled Sensor Environment Zone Dropdown -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Sensor Environment Zone</label>
+                            <input type="hidden" id="sensorZone" value="INDUSTRIAL">
+                            
+                            <div class="relative" id="customZoneContainer">
+                                <button type="button" id="zoneTrigger" onclick="toggleZoneMenu()" class="w-full bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-800 flex items-center justify-between shadow-xs transition-all focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                    <div class="flex items-center gap-2 truncate">
+                                        <span id="zoneSelectedIcon" class="w-5 h-5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] shrink-0 border border-indigo-200">
+                                            <i class="fa-solid fa-industry"></i>
+                                        </span>
+                                        <span id="zoneSelectedText" class="truncate font-bold text-slate-800">INDUSTRIAL</span>
+                                    </div>
+                                    <i id="zoneChevron" class="fa-solid fa-chevron-down text-[10px] text-slate-400 shrink-0 ml-1.5 transition-transform duration-200"></i>
+                                </button>
+
+                                <div id="zoneMenu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden py-1 divide-y divide-slate-100 transition-all">
+                                    <div onclick="selectZoneOption('INDUSTRIAL', 'INDUSTRIAL', 'fa-industry', 'indigo')" class="px-3.5 py-2 hover:bg-indigo-50/80 cursor-pointer flex items-center justify-between group transition">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0 border border-indigo-200">
+                                                <i class="fa-solid fa-industry"></i>
+                                            </span>
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-slate-800 group-hover:text-indigo-900 truncate">INDUSTRIAL</div>
+                                                <div class="text-[10px] text-slate-400">Factories, ports, heavy equipment</div>
+                                            </div>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">Zone A</span>
+                                    </div>
+                                    <div onclick="selectZoneOption('COMMERCIAL', 'COMMERCIAL', 'fa-building', 'amber')" class="px-3.5 py-2 hover:bg-amber-50/80 cursor-pointer flex items-center justify-between group transition">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 border border-amber-200">
+                                                <i class="fa-solid fa-building"></i>
+                                            </span>
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-slate-800 group-hover:text-amber-900 truncate">COMMERCIAL</div>
+                                                <div class="text-[10px] text-slate-400">Shopping malls, banks, restaurants</div>
+                                            </div>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">Zone B</span>
+                                    </div>
+                                    <div onclick="selectZoneOption('RESIDENTIAL', 'RESIDENTIAL', 'fa-house', 'emerald')" class="px-3.5 py-2 hover:bg-emerald-50/80 cursor-pointer flex items-center justify-between group transition">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <span class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shrink-0 border border-emerald-200">
+                                                <i class="fa-solid fa-house"></i>
+                                            </span>
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-slate-800 group-hover:text-emerald-900 truncate">RESIDENTIAL</div>
+                                                <div class="text-[10px] text-slate-400">Housing schemes, apartments, schools</div>
+                                            </div>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">Zone C</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="evaluateTelemetry()" class="w-full bg-amber-400 hover:bg-amber-500 text-neutral-900 font-extrabold py-2.5 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95">
                             <i class="fa-solid fa-play"></i> Evaluate Telemetry Against Policies
                         </button>
                     </div>
 
                     <!-- Evaluation Results & AST Display -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70">
-                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Active Municipal Ordinances & Logic Evaluation</h4>
-                            <div id="policyResultsContainer" class="space-y-3">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="bg-[#F8F9FA] p-4 sm:p-5 rounded-2xl border border-slate-200/70 shadow-xs">
+                            <div class="pb-2 border-b border-slate-200/80 flex items-center justify-between mb-3">
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Active Municipal Ordinances & Logic Evaluation</h4>
+                                    <p class="text-[11px] text-slate-400">Interpreter Pattern Abstract Syntax Tree (AST) validation</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="openAddPolicyModal()" class="px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-500 text-neutral-900 shadow-2xs transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+                                        <i class="fa-solid fa-plus text-[10px]"></i> Add Ordinance
+                                    </button>
+                                    <button type="button" onclick="resetDefaultPolicies()" class="p-1 px-2 rounded-xl text-[10px] font-bold text-slate-500 hover:text-rose-600 hover:bg-slate-100 transition flex items-center gap-1 cursor-pointer" title="Reset to original POL-01, 02, 03">
+                                        <i class="fa-solid fa-rotate-left"></i>
+                                    </button>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs shrink-0">
+                                        DSL AST Engine
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div id="policyResultsContainer" class="space-y-2.5">
                                 <p class="text-xs text-slate-400">Click evaluate to run policy validation engine...</p>
                             </div>
                         </div>
 
                         <!-- Custom DSL Rule Sandbox -->
-                        <div class="bg-[#F8F9FA] p-5 rounded-2xl border border-slate-200/70 space-y-3">
-                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Custom Ordinance Rule Sandbox (Live Rule Evaluator)</h4>
-                            <p class="text-xs text-slate-400">Type any custom municipal compliance rule (using AND, OR, &gt;, &lt;, ==):</p>
-                            <div class="flex gap-2">
-                                <input type="text" id="customRuleInput" value="NOISE_LEVEL > 80 AND SENSOR_ZONE == INDUSTRIAL" class="flex-grow bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-mono font-semibold text-neutral-800 focus:border-amber-500 focus:outline-none">
-                                <button onclick="testCustomDslRule()" class="bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition">
-                                    Evaluate Ordinance
+                        <div class="bg-[#F8F9FA] p-4 sm:p-5 rounded-2xl border border-slate-200/70 space-y-3 shadow-xs">
+                            <div class="pb-2 border-b border-slate-200/80">
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Custom Ordinance Rule Sandbox (Live Rule Evaluator)</h4>
+                                <p class="text-[11px] text-slate-400">Type any custom municipal compliance rule (using AND, OR, &gt;, &lt;, ==):</p>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" id="customRuleInput" value="NOISE_LEVEL > 80 AND SENSOR_ZONE == INDUSTRIAL" class="flex-grow bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-semibold text-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-400 focus:outline-none transition">
+                                <button onclick="testCustomDslRule()" class="bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs shrink-0 cursor-pointer active:scale-95 flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-play text-[10px]"></i> Evaluate Ordinance
                                 </button>
                             </div>
-                            <div id="customRuleOutput" class="p-3.5 bg-white rounded-xl border border-slate-200 text-xs font-mono text-slate-700 hidden shadow-sm">
+                            <div id="customRuleOutput" class="p-3 bg-white rounded-xl border border-slate-200/90 text-xs font-mono text-slate-700 hidden shadow-xs space-y-1.5">
                             </div>
                         </div>
                     </div>
@@ -1316,6 +1677,123 @@
         </section>
 
     </main>
+
+    <!-- Global Theme Confirmation & Alert Modal (Matches SmartCity360 Light Theme) -->
+    <div id="themeConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- Backdrop Blur -->
+        <div onclick="closeConfirmModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"></div>
+
+        <!-- Modal Dialog Box -->
+        <div class="relative bg-white rounded-3xl border border-slate-200/90 shadow-2xl p-5 sm:p-6 max-w-md w-full space-y-4 z-10 transform transition-all animate-in fade-in zoom-in-95 duration-200">
+            <!-- Icon & Header -->
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div id="confirmModalIcon" class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center text-xl shadow-xs shrink-0">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span id="confirmModalBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            Chain Dispatched
+                        </span>
+                        <h4 id="confirmModalTitle" class="text-base font-extrabold text-slate-900 mt-1 truncate">
+                            Incident Dispatched Successfully!
+                        </h4>
+                    </div>
+                </div>
+                <button onclick="closeConfirmModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-800 flex items-center justify-center text-xs transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Content Body -->
+            <div id="confirmModalBody" class="space-y-2.5 bg-[#F8F9FA] rounded-2xl p-3.5 border border-slate-200/70 text-xs">
+                <!-- Dynamic Content injected here -->
+            </div>
+
+            <!-- Footer Action Button -->
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button onclick="closeConfirmModal()" class="w-full py-2.5 rounded-xl font-bold text-xs bg-neutral-900 hover:bg-neutral-800 text-white transition shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-check"></i> Acknowledge & View in Pipeline
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Municipal Ordinance Modal (Part E DSL) -->
+    <div id="addOrdinanceModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- Backdrop Blur -->
+        <div onclick="closeAddPolicyModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"></div>
+
+        <!-- Modal Dialog Box -->
+        <div class="relative bg-white rounded-3xl border border-slate-200/90 shadow-2xl p-5 sm:p-6 max-w-lg w-full space-y-4 z-10 transform transition-all animate-in fade-in zoom-in-95 duration-200">
+            <!-- Icon & Header -->
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/80 flex items-center justify-center text-lg shadow-xs shrink-0">
+                        <i class="fa-solid fa-file-circle-plus"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                            Interpreter Pattern Mini DSL
+                        </span>
+                        <h4 class="text-base font-extrabold text-slate-900 mt-0.5 truncate">
+                            Register Municipal Ordinance
+                        </h4>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAddPolicyModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-800 flex items-center justify-center text-xs transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Form -->
+            <div class="space-y-3.5 bg-[#F8F9FA] rounded-2xl p-4 border border-slate-200/70 text-xs">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-bold text-slate-700">Policy Identifier</label>
+                        <span class="text-[10px] text-slate-400">e.g. POL-04 (Auto if empty)</span>
+                    </div>
+                    <input type="text" id="newPolicyId" placeholder="e.g. POL-04" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-400 transition">
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-bold text-slate-700">DSL Ordinance Rule Expression *</label>
+                        <span class="text-[10px] text-amber-700 font-semibold">Mini DSL Syntax</span>
+                    </div>
+                    <textarea id="newPolicyRule" rows="2" placeholder="e.g. PARKING_DURATION > 45 AND TIME_HOUR > 18" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-semibold text-slate-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-400 transition resize-none"></textarea>
+                </div>
+
+                <!-- Quick Preset Chips -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Quick Rule Presets</label>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button" onclick="setPresetRule('PARKING_DURATION > 45 AND TIME_HOUR > 18')" class="px-2 py-1 rounded-lg text-[10px] font-mono font-semibold bg-white border border-slate-200 text-slate-600 hover:border-amber-400 hover:text-amber-700 transition cursor-pointer">
+                            Parking > 45 &amp; Hour > 18
+                        </button>
+                        <button type="button" onclick="setPresetRule('AIR_AQI > 120 AND SENSOR_ZONE == RESIDENTIAL')" class="px-2 py-1 rounded-lg text-[10px] font-mono font-semibold bg-white border border-slate-200 text-slate-600 hover:border-amber-400 hover:text-amber-700 transition cursor-pointer">
+                            AQI > 120 &amp; Residential
+                        </button>
+                        <button type="button" onclick="setPresetRule('NOISE_LEVEL > 80 OR VEHICLE_TYPE == COMMERCIAL')" class="px-2 py-1 rounded-lg text-[10px] font-mono font-semibold bg-white border border-slate-200 text-slate-600 hover:border-amber-400 hover:text-amber-700 transition cursor-pointer">
+                            Noise > 80 or Commercial
+                        </button>
+                    </div>
+                </div>
+
+                <div id="addPolicyFeedback" class="hidden text-[11px] font-semibold px-3 py-2 rounded-xl"></div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="button" onclick="closeAddPolicyModal()" class="px-4 py-2 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" onclick="submitNewMunicipalPolicy()" class="px-5 py-2 rounded-xl font-extrabold text-xs bg-amber-400 hover:bg-amber-500 text-neutral-900 transition shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-check text-[11px]"></i> Register Ordinance
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- App JavaScript Integration -->
     <script src="/js/app.js"></script>
