@@ -2054,11 +2054,28 @@ function toggleAllLights() {
 // ==========================================
 // PART E: INTERPRETER PATTERN (Policy DSL)
 // ==========================================
-let clientMunicipalPolicies = [
-    { policyId: "POL-01", dslRule: "NOISE_LEVEL > 75 AND TIME_HOUR >= 22" },
-    { policyId: "POL-02", dslRule: "PARKING_DURATION > 120 OR VEHICLE_TYPE == COMMERCIAL" },
-    { policyId: "POL-03", dslRule: "AIR_AQI > 150 AND SENSOR_ZONE == INDUSTRIAL" }
-];
+function loadStoredPolicies() {
+    try {
+        const saved = localStorage.getItem('smartcity360_municipal_policies');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    } catch (e) {}
+    return [
+        { policyId: "POL-01", dslRule: "NOISE_LEVEL > 75 AND TIME_HOUR >= 22" },
+        { policyId: "POL-02", dslRule: "PARKING_DURATION > 120 OR VEHICLE_TYPE == COMMERCIAL" },
+        { policyId: "POL-03", dslRule: "AIR_AQI > 150 AND SENSOR_ZONE == INDUSTRIAL" }
+    ];
+}
+
+function saveStoredPolicies(list) {
+    try {
+        localStorage.setItem('smartcity360_municipal_policies', JSON.stringify(list));
+    } catch (e) {}
+}
+
+let clientMunicipalPolicies = loadStoredPolicies();
 
 function openAddPolicyModal() {
     const modal = document.getElementById('addOrdinanceModal');
@@ -2102,10 +2119,15 @@ async function submitNewMunicipalPolicy() {
         return;
     }
 
-    const id = idInput?.value.trim() || '';
+    const newId = idInput?.value.trim() || `POL-${String(clientMunicipalPolicies.length + 1).padStart(2, '0')}`;
+
+    // Always persist to client state & localStorage
+    clientMunicipalPolicies = clientMunicipalPolicies.filter(p => p.policyId !== newId);
+    clientMunicipalPolicies.push({ policyId: newId, dslRule: rule });
+    saveStoredPolicies(clientMunicipalPolicies);
 
     try {
-        const res = await fetch(`/api/part-e/add-policy?policyId=${encodeURIComponent(id)}&dslRule=${encodeURIComponent(rule)}`, {
+        const res = await fetch(`/api/part-e/add-policy?policyId=${encodeURIComponent(newId)}&dslRule=${encodeURIComponent(rule)}`, {
             method: 'POST'
         });
         const data = await res.json();
@@ -2121,9 +2143,7 @@ async function submitNewMunicipalPolicy() {
             }
         }
     } catch (err) {
-        console.warn('Backend offline, registering in local state:', err);
-        const newId = id || `POL-0${clientMunicipalPolicies.length + 1}`;
-        clientMunicipalPolicies.push({ policyId: newId, dslRule: rule });
+        console.warn('Backend offline, registered in local persistent state:', err);
         if (ruleInput) ruleInput.value = '';
         if (idInput) idInput.value = '';
         closeAddPolicyModal();
@@ -2140,9 +2160,17 @@ async function deleteMunicipalPolicy(policyId) {
         console.warn('Delete policy offline:', e);
     }
     clientMunicipalPolicies = clientMunicipalPolicies.filter(p => p.policyId !== policyId);
+    saveStoredPolicies(clientMunicipalPolicies);
     await evaluateTelemetry();
 }
 window.deleteMunicipalPolicy = deleteMunicipalPolicy;
+
+function confirmResetDefaults() {
+    if (confirm('Are you sure you want to restore default municipal policies (POL-01, POL-02, POL-03)?')) {
+        resetDefaultPolicies();
+    }
+}
+window.confirmResetDefaults = confirmResetDefaults;
 
 async function resetDefaultPolicies() {
     try {
@@ -2155,6 +2183,8 @@ async function resetDefaultPolicies() {
         { policyId: "POL-02", dslRule: "PARKING_DURATION > 120 OR VEHICLE_TYPE == COMMERCIAL" },
         { policyId: "POL-03", dslRule: "AIR_AQI > 150 AND SENSOR_ZONE == INDUSTRIAL" }
     ];
+    saveStoredPolicies(clientMunicipalPolicies);
+    closeAddPolicyModal();
     await evaluateTelemetry();
 }
 window.resetDefaultPolicies = resetDefaultPolicies;
